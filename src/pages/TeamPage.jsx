@@ -4,6 +4,9 @@ import RosterCard from "../components/RosterCard";
 import Last10GamesChart from "../components/charts/Last10GamesChart";
 import PowerPlayChart from "../components/charts/PowerPlayChart";
 import teamColors from "../data/teamColors";
+import GoalsBarChart from "../components/charts/GoalsBarChart";
+import HomeRoadChart from "../components/charts/HomeRoadChart";
+import WinTypesDonut from "../components/charts/WinTypesDonut";
 
 export default function TeamPage() {
   const { abbr } = useParams();
@@ -23,21 +26,68 @@ export default function TeamPage() {
 
         if (!team) throw new Error("Team not found");
 
-        setTeamData({
-          team_name: team.teamName.default,
-          team_abbr: team.teamAbbrev.default,
-          logo: team.teamLogo,
-          wins: team.wins,
-          losses: team.losses,
-          points: team.points,
-          l10_wins: team.l10Wins,
-          l10_losses: team.l10Losses,
-          l10_ot_losses: team.l10OtLosses,
-          goals_for: team.goalFor,
-          goals_against: team.goalAgainst,
-          conference : team.conferenceName,
-          division: team.divisionName,
-        });
+       
+      setTeamData({
+        // Team info
+        team_name: team.teamName.default,
+        team_abbr: team.teamAbbrev.default,
+        logo: team.teamLogo,
+        conference: team.conferenceName,
+        division: team.divisionName,
+
+        // Basic record
+        wins: team.wins,
+        losses: team.losses,
+        ot_losses: team.otLosses,
+        games_played: team.gamesPlayed,
+        points: team.points,
+        point_pctg: team.pointPctg,
+        win_pctg: team.winPctg,
+        clinch: team.clinchIndicator || "",
+
+        // Goals
+        goals_for: team.goalFor,
+        goals_against: team.goalAgainst,
+        goal_diff: team.goalDifferential,
+
+        // Streaks
+        streak_type: team.streakCode || "",
+        streak_length: team.streakCount || 0,
+
+        // Regulation / Shootout
+        regulation_wins: team.regulationWins,
+        reg_ot_wins: (team.regulationPlusOtWins || 0) - (team.regulationWins || 0),
+        shootout_wins: team.shootoutWins,
+        shootout_losses: team.shootoutLosses,
+
+        // Home/Road splits
+        home_games_played: team.homeGamesPlayed,
+        home_wins: team.homeWins,
+        home_losses: team.homeLosses,
+        home_ot_losses: team.homeOtLosses,
+        home_points: team.homePoints,
+        home_goals_for: team.homeGoalsFor,
+        home_goals_against: team.homeGoalsAgainst,
+        home_goal_diff: team.homeGoalDifferential,
+
+        road_games_played: team.roadGamesPlayed,
+        road_wins: team.roadWins,
+        road_losses: team.roadLosses,
+        road_ot_losses: team.roadOtLosses,
+        road_points: team.roadPoints,
+        road_goals_for: team.roadGoalsFor,
+        road_goals_against: team.roadGoalsAgainst,
+        road_goal_diff: team.roadGoalDifferential,
+
+        // Last 10 games
+        l10_wins: team.l10Wins,
+        l10_losses: team.l10Losses,
+        l10_ot_losses: team.l10OtLosses,
+        l10_points: team.l10Points,
+        l10_goals_for: team.l10GoalsFor,
+        l10_goals_against: team.l10GoalsAgainst,
+        l10_goal_diff: team.l10GoalDifferential,
+      });
 
         // Fetch roster
         const rosterRes = await fetch(`http://localhost:5000/api/roster/${abbr}`);
@@ -75,16 +125,54 @@ export default function TeamPage() {
   const textColor = teamColors[abbr]?.secondary ||defaultColor;
 
 
-  const last10Data = [
-    { name: "Wins", value: teamData.l10_wins || 0 },
-    { name: "Losses", value: teamData.l10_losses || 0 },
-    { name: "OT Losses", value: teamData.l10_ot_losses || 0 },
-  ];
+ 
 
   const ppData = [
     { name: "PP%", value: teamData.power_play_pct || 0 },
     { name: "PP Goals", value: teamData.power_play_goals || 0 },
   ];
+
+  // Home vs Road goals
+const goalsData = [
+  {
+    name: "Home",
+    For: teamData.home_goals_for || 0,
+    Against: teamData.home_goals_against || 0,
+    Diff: teamData.home_goal_diff || 0,
+  },
+  {
+    name: "Road",
+    For: teamData.road_goals_for || 0,
+    Against: teamData.road_goals_against || 0,
+    Diff: teamData.road_goal_diff || 0,
+  },
+];
+
+// Home vs Road results
+const resultsData = [
+  {
+    name: "Home",
+    Wins: teamData.home_wins || 0,
+    OT: teamData.home_ot_losses || 0,
+    Losses: teamData.home_losses || 0,
+  },
+  {
+    name: "Road",
+    Wins: teamData.road_wins || 0,
+    OT: teamData.road_ot_losses || 0,
+    Losses: teamData.road_losses || 0,
+  },
+];
+
+const winTypesData = teamData
+  ? [
+      { name: "Regulation", value: teamData.regulation_wins || 0 },
+      { name: "OT", value: teamData.reg_ot_wins || 0 },
+      { name: "Shootout", value: teamData.shootout_wins || 0 },
+    ]
+  : [];
+
+
 
   return (
     <div className="min-h-screen bg-white relative" style={{paddingLeft:"10px"}}>
@@ -144,37 +232,163 @@ export default function TeamPage() {
   </div>
 
   {/* Roster */}
-  <section className="p-6 mb-8">
-    <h2 className="text-2xl font-semibold mb-4">Roster</h2>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {roster.map((player) => (
-        <RosterCard key={player.player_id} player={player} />
-      ))}
+<section className="p-6 mb-8">
+  <h2 className="text-2xl font-semibold mb-4">Roster</h2>
+
+  {/* Forwards */}
+  {roster.filter(p => ["L", "C", "R"].includes(p.positionCode)).length > 0 && (
+    <div className="mb-6">
+      <h3 className="text-xl font-semibold mb-2">Forwards</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {roster
+          .filter(p => ["L", "C", "R"].includes(p.positionCode))
+          .map(player => <RosterCard key={player.player_id} player={player} />)}
+      </div>
     </div>
-  </section>
+  )}
+
+
+  {/* Defensemen */}
+  {roster.filter(p => p.positionCode === "D").length > 0 && (
+    <div className="mb-6">
+      <h3 className="text-xl font-semibold mb-2">Defensemen</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {roster
+          .filter(p => p.positionCode === "D")
+          .map(player => (
+            <RosterCard key={player.player_id} player={player} />
+          ))}
+      </div>
+    </div>
+  )}
+
+  {/* Goalies */}
+  {roster.filter(p => p.positionCode === "G").length > 0 && (
+    <div className="mb-6">
+      <h3 className="text-xl font-semibold mb-2">Goalies</h3>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {roster
+          .filter(p => p.positionCode === "G")
+          .map(player => (
+            <RosterCard key={player.player_id} player={player} />
+          ))}
+      </div>
+    </div>
+  )}
+</section>
 
   {/* Stats & Charts */}
-  <section className="p-6 mb-8">
-    <h2 className="text-2xl font-semibold mb-4">Team Stats</h2>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div className="p-4 border rounded">Wins: {teamData.wins}</div>
-      <div className="p-4 border rounded">Losses: {teamData.losses}</div>
-      <div className="p-4 border rounded">Points: {teamData.points}</div>
-      <div className="p-4 border rounded">Goals For: {teamData.goals_for}</div>
-      <div className="p-4 border rounded">Goals Against: {teamData.goals_against}</div>
-      
+<section className="p-6 mb-8">
+  <h2 className="text-2xl font-semibold mb-6">Team Stats</h2>
+
+  {/* Key Numbers */}
+  
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Wins</span>
+      <span className="text-2xl font-bold">{teamData.wins}</span>
+    </div>
+    
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Losses</span>
+      <span className="text-2xl font-bold">{teamData.losses}</span>
+    </div>
+    
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Points</span>
+      <span className="text-2xl font-bold">{teamData.points}</span>
     </div>
 
-    <div className="mb-6">
-      <h3 className="text-xl font-semibold mb-2">Last 10 Games</h3>
-      <Last10GamesChart data={last10Data} color={color} />
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center ">
+      <span className="text-sm text-gray-500">Goals For</span>
+      <span className="text-2xl font-bold">{teamData.goals_for}</span>
     </div>
 
-    <div className="mb-6">
-      <h3 className="text-xl font-semibold mb-2">Power Play Stats</h3>
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Goals Against</span>
+      <span className="text-2xl font-bold">{teamData.goals_against}</span>
+    </div>
+    
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Goal Diff</span>
+      <span className={`text-2xl font-bold ${teamData.goal_diff >= 0 ? "text-green-600" : "text-red-600"}`}>
+        {teamData.goal_diff >= 0 ? `+${teamData.goal_diff}` : teamData.goal_diff}
+      </span>
+    </div>
+
+    <div className="p-4 bg-white rounded-2xl shadow relative w-full h-32 flex flex-col items-center">
+      <span className="text-sm text-gray-500 font-semibold mb-2">Last 10 Games</span>
+
+   
+      {teamData.streak_type && teamData.streak_length > 0 && (
+        <span
+          className={`absolute top-4 left-4 px-3 py-1 rounded-full text-white font-semibold text-sm ${
+            teamData.streak_type.startsWith("W")
+              ? "bg-green-600"
+              : teamData.streak_type.startsWith("L")
+              ? "bg-red-600"
+              : "bg-gray-500"
+          }`}
+        >
+          {teamData.streak_type}{teamData.streak_length}
+        </span>
+      )}
+
+
+      <div className="text-center">
+        <span className="text-2xl font-bold">
+          {teamData.l10_wins || 0}-{teamData.l10_losses || 0}-{teamData.l10_ot_losses || 0}
+        </span>
+        <span className="text-xs text-gray-500 block mt-1">W - L - OT</span>
+      </div>
+    </div>
+
+
+  </div>
+
+
+  
+{/* Charts Section */}
+<section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {/* Home vs Road Goals */}
+  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+    <h3 className="text-xl font-semibold mb-4 text-center">Home vs Road Goals</h3>
+    <div className="w-full max-w-md"> {/* constrains chart width */}
+      <GoalsBarChart goalsData={goalsData} color={color} />
+    </div>
+  </div>
+
+  {/* Home vs Road Results */}
+  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+    <h3 className="text-xl font-semibold mb-4 text-center">Home vs Road Results</h3>
+    <div className="w-full max-w-md">
+      <HomeRoadChart resultsData={resultsData} color={color} />
+    </div>
+  </div>
+
+  {/* Win Breakdown */}
+  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+    <h3 className="text-xl font-semibold mb-4 text-center">Win Breakdown</h3>
+    <div className="w-full max-w-md h-72"> {/* matches other charts' max width */}
+      <WinTypesDonut winTypesData={winTypesData} color={color} />
+    </div>
+  </div>
+
+
+  
+
+  {/* Power Play Stats */}
+  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+    <h3 className="text-xl font-semibold mb-4 text-center">Power Play Stats</h3>
+    <div className="w-full max-w-md">
       <PowerPlayChart data={ppData} color={color} />
     </div>
-  </section>
+  </div>
+</section>
+
+
+
+</section>
 </div>
 
   );
