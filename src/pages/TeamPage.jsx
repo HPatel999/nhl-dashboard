@@ -1,8 +1,6 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import RosterCard from "../components/RosterCard";
-import Last10GamesChart from "../components/charts/Last10GamesChart";
-import PowerPlayChart from "../components/charts/PowerPlayChart";
 import teamColors from "../data/teamColors";
 import GoalsBarChart from "../components/charts/GoalsBarChart";
 import HomeRoadChart from "../components/charts/HomeRoadChart";
@@ -13,6 +11,8 @@ export default function TeamPage() {
   const [teamData, setTeamData] = useState(null);
   const [roster, setRoster] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [faceoffData, setFaceoffData] = useState(null);
+
 
   useEffect(() => {
     async function fetchTeam() {
@@ -106,6 +106,26 @@ export default function TeamPage() {
           headshot: p.headshot,
         }));
 
+        const faceoffRes = await fetch(`http://localhost:5000/api/stats/${abbr}/faceoffpercentages`);
+        const faceoffData = await faceoffRes.json();
+        const faceoffMapped = (faceoffData.data || []).map((p) => ({
+          totalFaceoffs: p.totalFaceoffs,
+          faceoffWinPct: p.faceoffWinPct,
+          evFaceoffPct: p.evFaceoffPct,
+          ppFaceoffPct: p.ppFaceoffPct,
+          shFaceoffPct: p.shFaceoffPct,
+          defensiveZoneFaceoffPct: p.defensiveZoneFaceoffPct,
+          neutralZoneFaceoffPct: p.neutralZoneFaceoffPct,
+          offensiveZoneFaceoffPct: p.offensiveZoneFaceoffPct,
+        }));
+
+        
+
+
+
+
+
+        setFaceoffData(faceoffMapped[0]);
         setRoster(rosterMapped);
         setLoading(false);
       } catch (err) {
@@ -119,6 +139,8 @@ export default function TeamPage() {
 
   if (loading) return <p className="p-6">Loading...</p>;
   if (!teamData) return <p className="p-6">Team not found.</p>;
+  if (!faceoffData) return <p className="p-6">Faceoff Stats N/A.</p>;
+
 
   const defaultColor = "#1d1d1d"; // fallback
   const color = teamColors[abbr]?.primary || defaultColor;
@@ -127,10 +149,6 @@ export default function TeamPage() {
 
  
 
-  const ppData = [
-    { name: "PP%", value: teamData.power_play_pct || 0 },
-    { name: "PP Goals", value: teamData.power_play_goals || 0 },
-  ];
 
   // Home vs Road goals
 const goalsData = [
@@ -294,29 +312,7 @@ const winTypesData = teamData
       <span className="text-2xl font-bold">{teamData.losses}</span>
     </div>
     
-    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
-      <span className="text-sm text-gray-500">Points</span>
-      <span className="text-2xl font-bold">{teamData.points}</span>
-    </div>
-
-    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center ">
-      <span className="text-sm text-gray-500">Goals For</span>
-      <span className="text-2xl font-bold">{teamData.goals_for}</span>
-    </div>
-
-    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
-      <span className="text-sm text-gray-500">Goals Against</span>
-      <span className="text-2xl font-bold">{teamData.goals_against}</span>
-    </div>
-    
-    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
-      <span className="text-sm text-gray-500">Goal Diff</span>
-      <span className={`text-2xl font-bold ${teamData.goal_diff >= 0 ? "text-green-600" : "text-red-600"}`}>
-        {teamData.goal_diff >= 0 ? `+${teamData.goal_diff}` : teamData.goal_diff}
-      </span>
-    </div>
-
-    <div className="p-4 bg-white rounded-2xl shadow relative w-full h-32 flex flex-col items-center">
+        <div className="p-4 bg-white rounded-2xl shadow relative w-full h-32 flex flex-col items-center">
       <span className="text-sm text-gray-500 font-semibold mb-2">Last 10 Games</span>
 
    
@@ -342,6 +338,37 @@ const winTypesData = teamData
         <span className="text-xs text-gray-500 block mt-1">W - L - OT</span>
       </div>
     </div>
+    
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Points</span>
+      <span className="text-2xl font-bold">{teamData.points}</span>
+    </div>
+
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center ">
+      <span className="text-sm text-gray-500">Goals For</span>
+      <span className="text-2xl font-bold">{teamData.goals_for}</span>
+    </div>
+
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Goals Against</span>
+      <span className="text-2xl font-bold">{teamData.goals_against}</span>
+    </div>
+
+  
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Goal Diff</span>
+      <span className={`text-2xl font-bold ${teamData.goal_diff >= 0 ? "text-green-600" : "text-red-600"}`}>
+        {teamData.goal_diff >= 0 ? `+${teamData.goal_diff}` : teamData.goal_diff}
+      </span>
+    </div>
+   
+    <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+      <span className="text-sm text-gray-500">Faceoff Win %</span>
+      <span className="text-2xl font-bold">{(faceoffData.faceoffWinPct * 100).toFixed(1)} %</span>
+    </div>
+    
+    
+
 
 
   </div>
@@ -377,13 +404,7 @@ const winTypesData = teamData
 
   
 
-  {/* Power Play Stats */}
-  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
-    <h3 className="text-xl font-semibold mb-4 text-center">Power Play Stats</h3>
-    <div className="w-full max-w-md">
-      <PowerPlayChart data={ppData} color={color} />
-    </div>
-  </div>
+
 </section>
 
 

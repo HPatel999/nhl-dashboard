@@ -29,6 +29,26 @@ app.get("/api/roster/:teamAbbr", async (req, res) => {
   }
 });
 
+app.get("/api/stats/:teamAbbr/:endpoint", async (req, res) => {
+  const { teamAbbr, endpoint } = req.params;
+  const seasonId = 20242025;
+
+  const cayenneExpr = encodeURIComponent(
+    `teamAbbrev='${teamAbbr}' and seasonId=${seasonId}`
+  );
+  const url = `https://api.nhle.com/stats/rest/en/team/${endpoint}?cayenneExp=${cayenneExpr}`;
+
+  try {
+    const response = await fetch(url); // wait for fetch
+    const data = await response.json(); // wait for JSON parsing
+    res.json(data);
+  } catch (err) {
+    console.error("Error fetching NHL API:", err);
+    res.status(500).json({ error: "Failed to fetch NHL API" });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });
