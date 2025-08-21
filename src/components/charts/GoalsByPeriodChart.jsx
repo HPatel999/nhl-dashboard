@@ -1,22 +1,22 @@
 import React from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
-export default function HomeRoadResultsChart({ resultsData, color }) {
-  const oppositeColor = getOppositeColor(color)
+export default function GoalsByPeriodChart({ goalsByPeriodData, color }) {
+    const oppositeColor = getOppositeColor(color)
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <BarChart data={resultsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-        <XAxis dataKey="name" />
+      <BarChart data={goalsByPeriodData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+        <XAxis dataKey="period" />
         <YAxis />
         <Tooltip />
         <Legend />
-        <Bar dataKey="Wins" fill={color} />
-        <Bar dataKey="OT" fill="#8884d8" />
-        <Bar dataKey="Losses" fill={oppositeColor} />
+        <Bar dataKey="GoalsFor" fill={color} />
+        <Bar dataKey="GoalsAgainst" fill={oppositeColor} />
       </BarChart>
     </ResponsiveContainer>
   );
 }
+
 
 function getOppositeColor(hex) {
   const cleanHex = hex.replace("#", "");

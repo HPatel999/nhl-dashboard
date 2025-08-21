@@ -3,7 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recha
 export default function WinTypesDonut({ winTypesData, color }) {
 
 
-  const COLORS = [color, "#f59e0b", "#6366f1"]; // adjust as you like
+  const COLORS = [color, "#f59e0b", "#6366f1"]; 
 
   return (
     <ResponsiveContainer width="100%" height={300}>

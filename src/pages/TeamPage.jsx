@@ -5,6 +5,8 @@ import teamColors from "../data/teamColors";
 import GoalsBarChart from "../components/charts/GoalsBarChart";
 import HomeRoadChart from "../components/charts/HomeRoadChart";
 import WinTypesDonut from "../components/charts/WinTypesDonut";
+import FaceoffPercentagesByZone from "../components/charts/FaceoffWinByZoneChart";
+import GoalsByPeriodChart from "../components/charts/GoalsByPeriodChart";
 
 export default function TeamPage() {
   const { abbr } = useParams();
@@ -12,6 +14,7 @@ export default function TeamPage() {
   const [roster, setRoster] = useState([]);
   const [loading, setLoading] = useState(true);
   const [faceoffData, setFaceoffData] = useState(null);
+  const [goalsByPeriodData, setGoalsByPeriodData] = useState([]);
 
 
   useEffect(() => {
@@ -108,24 +111,38 @@ export default function TeamPage() {
 
         const faceoffRes = await fetch(`http://localhost:5000/api/stats/${abbr}/faceoffpercentages`);
         const faceoffData = await faceoffRes.json();
-        const faceoffMapped = (faceoffData.data || []).map((p) => ({
-          totalFaceoffs: p.totalFaceoffs,
-          faceoffWinPct: p.faceoffWinPct,
-          evFaceoffPct: p.evFaceoffPct,
-          ppFaceoffPct: p.ppFaceoffPct,
-          shFaceoffPct: p.shFaceoffPct,
-          defensiveZoneFaceoffPct: p.defensiveZoneFaceoffPct,
-          neutralZoneFaceoffPct: p.neutralZoneFaceoffPct,
-          offensiveZoneFaceoffPct: p.offensiveZoneFaceoffPct,
-        }));
+        const faceoffMapped = (faceoffData.data || []).map((p) => ([
+          { name: "Overall", value: p.faceoffWinPct },
+          { name: "Even Strength", value: p.evFaceoffPct },
+          { name: "Power Play", value: p.ppFaceoffPct },
+          { name: "Shorthanded", value: p.shFaceoffPct },
+          { name: "Defensive Zone", value: p.defensiveZoneFaceoffPct },
+          { name: "Neutral Zone", value: p.neutralZoneFaceoffPct },
+          { name: "Offensive Zone", value: p.offensiveZoneFaceoffPct },
+          ])).flat(); 
+        
+          const goalsByPeriodRes = await fetch(`http://localhost:5000/api/stats/${abbr}/goalsbyperiod`);
+          const goalsByPeriodJson = await goalsByPeriodRes.json();
+          if (goalsByPeriodJson.data && goalsByPeriodJson.data.length > 0) {
+            const p = goalsByPeriodJson.data[0];
+
+            const goalsByPeriodChartData = [
+            { period: "Period 1", GoalsFor: p.period1GoalsFor, GoalsAgainst: p.period1GoalsAgainst },
+            { period: "Period 2", GoalsFor: p.period2GoalsFor, GoalsAgainst: p.period2GoalsAgainst },
+            { period: "Period 3", GoalsFor: p.period3GoalsFor, GoalsAgainst: p.period3GoalsAgainst },
+            { period: "Overtime", GoalsFor: p.periodOtGoalsFor, GoalsAgainst: p.periodOtGoalsAgainst },
+            ];
+
+            setGoalsByPeriodData(goalsByPeriodChartData)
 
         
+          }
 
 
 
 
 
-        setFaceoffData(faceoffMapped[0]);
+        setFaceoffData(faceoffMapped);
         setRoster(rosterMapped);
         setLoading(false);
       } catch (err) {
@@ -189,6 +206,8 @@ const winTypesData = teamData
       { name: "Shootout", value: teamData.shootout_wins || 0 },
     ]
   : [];
+
+ 
 
 
 
@@ -364,7 +383,7 @@ const winTypesData = teamData
    
     <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
       <span className="text-sm text-gray-500">Faceoff Win %</span>
-      <span className="text-2xl font-bold">{(faceoffData.faceoffWinPct * 100).toFixed(1)} %</span>
+      <span className="text-2xl font-bold">{(faceoffData[0]?.value  * 100).toFixed(1)} %</span>
     </div>
     
     
@@ -400,6 +419,23 @@ const winTypesData = teamData
       <WinTypesDonut winTypesData={winTypesData} color={color} />
     </div>
   </div>
+
+   {/* Faceoff Breakdown */}
+  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+    <h3 className="text-xl font-semibold mb-4 text-center">Faceoff Breakdown</h3>
+    <div className="w-full max-w-md h-72"> {/* matches other charts' max width */}
+      <FaceoffPercentagesByZone faceoffData={faceoffData} color={color} />
+    </div>
+  </div>
+
+    {/* Goals By Period Results */}
+  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+    <h3 className="text-xl font-semibold mb-4 text-center">Goals By Period</h3>
+    <div className="w-full max-w-md">
+      <GoalsByPeriodChart goalsByPeriodData={goalsByPeriodData} color={color} />
+    </div>
+  </div>
+
 
 
   
