@@ -7,6 +7,7 @@ import HomeRoadChart from "../components/charts/HomeRoadChart";
 import WinTypesDonut from "../components/charts/WinTypesDonut";
 import FaceoffPercentagesByZone from "../components/charts/FaceoffWinByZoneChart";
 import GoalsByPeriodChart from "../components/charts/GoalsByPeriodChart";
+import ShootingTypeandGoalRadarChart from "../components/charts/ShootingTypeandGoalRadarChart";
 
 export default function TeamPage() {
   const { abbr } = useParams();
@@ -15,6 +16,9 @@ export default function TeamPage() {
   const [loading, setLoading] = useState(true);
   const [faceoffData, setFaceoffData] = useState(null);
   const [goalsByPeriodData, setGoalsByPeriodData] = useState([]);
+  const [radarData, setRadarData] = useState([]);
+
+
 
 
   useEffect(() => {
@@ -138,10 +142,40 @@ export default function TeamPage() {
         
           }
 
+        const radarRes = await fetch(`http://localhost:5000/api/stats/${abbr}/shottype`);
+        const radarJson = await radarRes.json();
+        console.log("Shot type API response:", radarJson);
+        const radarRaw = radarJson.data[0];
+
+        const shotTypeStats = [
+          { key: "Wrap Around", goals: radarRaw.goalsWrapAround, pct: radarRaw.shootingPctWrapAround },
+          { key: "Slap", goals: radarRaw.goalsSlap, pct: radarRaw.shootingPctSlap },
+          { key: "Snap", goals: radarRaw.goalsSnap, pct: radarRaw.shootingPctSnap },
+          { key:"Backhand", goals: radarRaw.goalsBackhand, pct:radarRaw.shootingPctBackhand},
+          { key: "Deflected", goals: radarRaw.goalsDeflected, pct: radarRaw.shootingPctDeflected },         
+          { key: "Wrist", goals: radarRaw.goalsWrist, pct: radarRaw.shootingPctWrist },
+          { key: "Tip-In", goals: radarRaw.goalsTipIn, pct: radarRaw.shootingPctTipIn },
+
+        ]
+        console.log("Shot type const:", shotTypeStats);
+
+
+        const totalGoals = shotTypeStats.reduce((sum,s) => sum + s.goals,0);
+        console.log("totalGoals:", totalGoals);
+
+        const normalizeShotTypePctandGoals = shotTypeStats.map(s =>({
+          name:s.key,
+          goals: totalGoals > 0 ? (s.goals/totalGoals) *100 : 0,
+          pct: s.pct * 100
+        }));
+       
+
+        console.log("Radar Data:", normalizeShotTypePctandGoals);
 
 
 
 
+        setRadarData(normalizeShotTypePctandGoals)
         setFaceoffData(faceoffMapped);
         setRoster(rosterMapped);
         setLoading(false);
@@ -435,6 +469,18 @@ const winTypesData = teamData
       <GoalsByPeriodChart goalsByPeriodData={goalsByPeriodData} color={color} />
     </div>
   </div>
+   
+    {/* Shooting Efficiency vs Goals */}
+  <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
+    <h3 className="text-xl font-semibold mb-4 text-center">
+      Shooting Efficiency and Goals By Type
+    </h3>
+    <div className="w-full max-w-md">
+      <ShootingTypeandGoalRadarChart radarData={radarData} color = {color}/>
+    </div>
+  </div>
+
+
 
 
 

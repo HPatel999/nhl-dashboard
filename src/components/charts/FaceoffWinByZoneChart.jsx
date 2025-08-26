@@ -11,7 +11,6 @@ import {
 } from "recharts";
 
 export default function FaceoffWinByZone({ faceoffData, color }) {
-  // Define colors for each zone
   const zoneColors = {
     Overall: color,
     "Even Strength": "#ff7f0e",
@@ -32,7 +31,7 @@ export default function FaceoffWinByZone({ faceoffData, color }) {
               display: "flex",
               alignItems: "center",
               marginRight: 15,
-              marginBottom: 5,
+              marginBottom: 1,
               fontSize: 14,
             }}
           >
