@@ -8,6 +8,7 @@ import WinTypesDonut from "../components/charts/WinTypesDonut";
 import FaceoffPercentagesByZone from "../components/charts/FaceoffWinByZoneChart";
 import GoalsByPeriodChart from "../components/charts/GoalsByPeriodChart";
 import ShootingTypeandGoalRadarChart from "../components/charts/ShootingTypeandGoalRadarChart";
+import Calendar from "../components/Calendar";
 
 export default function TeamPage() {
   const { abbr } = useParams();
@@ -17,6 +18,8 @@ export default function TeamPage() {
   const [faceoffData, setFaceoffData] = useState(null);
   const [goalsByPeriodData, setGoalsByPeriodData] = useState([]);
   const [radarData, setRadarData] = useState([]);
+  const [games, setGames] = useState([]);
+
 
 
 
@@ -168,10 +171,14 @@ export default function TeamPage() {
           goals: totalGoals > 0 ? (s.goals/totalGoals) *100 : 0,
           pct: s.pct * 100
         }));
-       
-
         console.log("Radar Data:", normalizeShotTypePctandGoals);
 
+        const scheduleRes = await fetch(`http://localhost:5000/api/schedule/${abbr}`);
+        console.log(scheduleRes);
+        const scheduleJson = await scheduleRes.json();
+        console.log(scheduleJson);
+
+        setGames(scheduleJson.games)
 
 
 
@@ -480,15 +487,12 @@ const winTypesData = teamData
     </div>
   </div>
 
-
-
-
-
-  
-
-
 </section>
-
+      
+<div className="p-4 sm:p-6 max-w-7xl mx-auto">
+  <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-center sm:text-left">{abbr} Schedule</h1>
+  <Calendar games={games} abbr={abbr} color = {color} textColor = {textColor} />
+</div>
 
 
 </section>

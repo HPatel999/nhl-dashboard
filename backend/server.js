@@ -29,6 +29,21 @@ app.get("/api/roster/:teamAbbr", async (req, res) => {
   }
 });
 
+ app.get("/api/schedule/:teamAbbr", async (req, res) => {
+  const { teamAbbr } = req.params;
+  try {
+    const response = await axios.get(
+      `https://api-web.nhle.com/v1/club-schedule-season/${teamAbbr.toLowerCase()}/20252026`
+    );
+    res.json(response.data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch schedule" });
+  }
+});
+
+
+
 app.get("/api/stats/:teamAbbr/:endpoint", async (req, res) => {
   const { teamAbbr, endpoint } = req.params;
   const seasonId = 20242025;
