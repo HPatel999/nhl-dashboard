@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 export default function RosterCard({ player }) {
   return (
+    <Link to={`/player/${player.player_id}`}>
     <div className="border p-2 rounded hover:shadow-lg transition text-center bg-white">
       {player.headshot ? (
         <img
@@ -16,5 +18,6 @@ export default function RosterCard({ player }) {
       <p>#{player.sweaterNumber || "—"}</p>
       <p>{player.positionCode || "—"}</p>
     </div>
+    </Link>
   );
 }

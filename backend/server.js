@@ -63,6 +63,18 @@ app.get("/api/stats/:teamAbbr/:endpoint", async (req, res) => {
   }
 });
 
+app.get("/api/player/:id/landing", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const response = await axios.get(
+      `https://api-web.nhle.com/v1/player/${id}/landing`
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error fetching player landing:", error.message);
+    res.status(500).json({ error: "Failed to fetch player landing data" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);

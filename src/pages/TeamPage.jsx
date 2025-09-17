@@ -134,10 +134,10 @@ export default function TeamPage() {
             const p = goalsByPeriodJson.data[0];
 
             const goalsByPeriodChartData = [
-            { period: "Period 1", GoalsFor: p.period1GoalsFor, GoalsAgainst: p.period1GoalsAgainst },
-            { period: "Period 2", GoalsFor: p.period2GoalsFor, GoalsAgainst: p.period2GoalsAgainst },
-            { period: "Period 3", GoalsFor: p.period3GoalsFor, GoalsAgainst: p.period3GoalsAgainst },
-            { period: "Overtime", GoalsFor: p.periodOtGoalsFor, GoalsAgainst: p.periodOtGoalsAgainst },
+            { period: "#1st", GoalsFor: p.period1GoalsFor, GoalsAgainst: p.period1GoalsAgainst },
+            { period: "#2nd", GoalsFor: p.period2GoalsFor, GoalsAgainst: p.period2GoalsAgainst },
+            { period: "#3rd", GoalsFor: p.period3GoalsFor, GoalsAgainst: p.period3GoalsAgainst },
+            { period: "OT", GoalsFor: p.periodOtGoalsFor, GoalsAgainst: p.periodOtGoalsAgainst },
             ];
 
             setGoalsByPeriodData(goalsByPeriodChartData)
