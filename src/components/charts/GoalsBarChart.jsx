@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } fro
 
 export default function HomeRoadGoalsChart({ goalsData, color }) {
       const oppositeColor = getOppositeColor(color)
+      
   return (
     <ResponsiveContainer width="100%" height={300}>
       <BarChart data={goalsData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

@@ -25,8 +25,10 @@ export default function TeamPage() {
 
 
   useEffect(() => {
+    console.log("Mounted PlayerPage");
     async function fetchTeam() {
       try {
+
         // Fetch standings
         const standingsRes = await fetch("http://localhost:5000/api/standings");
         const standingsData = await standingsRes.json();
@@ -147,7 +149,7 @@ export default function TeamPage() {
 
         const radarRes = await fetch(`http://localhost:5000/api/stats/${abbr}/shottype`);
         const radarJson = await radarRes.json();
-        console.log("Shot type API response:", radarJson);
+        // console.log("Shot type API response:", radarJson);
         const radarRaw = radarJson.data[0];
 
         const shotTypeStats = [
@@ -160,23 +162,23 @@ export default function TeamPage() {
           { key: "Tip-In", goals: radarRaw.goalsTipIn, pct: radarRaw.shootingPctTipIn },
 
         ]
-        console.log("Shot type const:", shotTypeStats);
+        // console.log("Shot type const:", shotTypeStats);
 
 
         const totalGoals = shotTypeStats.reduce((sum,s) => sum + s.goals,0);
-        console.log("totalGoals:", totalGoals);
+        // console.log("totalGoals:", totalGoals);
 
         const normalizeShotTypePctandGoals = shotTypeStats.map(s =>({
           name:s.key,
           goals: totalGoals > 0 ? (s.goals/totalGoals) *100 : 0,
           pct: s.pct * 100
         }));
-        console.log("Radar Data:", normalizeShotTypePctandGoals);
+        // console.log("Radar Data:", normalizeShotTypePctandGoals);
 
         const scheduleRes = await fetch(`http://localhost:5000/api/schedule/${abbr}`);
-        console.log(scheduleRes);
+        // console.log(scheduleRes);
         const scheduleJson = await scheduleRes.json();
-        console.log(scheduleJson);
+        // console.log(scheduleJson);
 
         setGames(scheduleJson.games)
 
@@ -190,9 +192,14 @@ export default function TeamPage() {
         console.error(err);
         setLoading(false);
       }
+
+      
     }
 
     fetchTeam();
+    return () => {
+    console.log("Unmounted TeamPage");
+  };
   }, [abbr]);
 
   if (loading) return <p className="p-6">Loading...</p>;
@@ -253,7 +260,9 @@ const winTypesData = teamData
 
 
   return (
-    <div className="min-h-screen bg-white relative" style={{paddingLeft:"10px"}}>
+
+    
+  <div className="min-h-screen bg-white relative" style={{paddingLeft:"10px"}}>
   {/* Vertical color stripe */}
   <div
     className="absolute left-0 top-0 h-full"

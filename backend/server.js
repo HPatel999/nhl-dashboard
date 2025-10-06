@@ -76,6 +76,35 @@ app.get("/api/player/:id/landing", async (req, res) => {
   }
 });
 
+app.get("/api/stats/:type/:endpoint/:id/:seasonId", async (req, res) => {
+  const { type, endpoint, id, seasonId } = req.params;
+
+
+  const cayenneExpr = encodeURIComponent(`playerId=${id} and seasonId=${seasonId}` );
+  try {
+    const url = `https://api.nhle.com/stats/rest/en/${type}/${endpoint}?cayenneExp=${cayenneExpr}`;
+
+    console.log("Fetching:", url);
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`NHL API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    console.error("Error fetching player stats:", err.message);
+    res.status(500).json({ error: "Failed to fetch NHL API" });
+  }
+});
+
+export default app;
+
+
+
+
+
 app.listen(PORT, () => {
   console.log(`Backend running on http://localhost:${PORT}`);
 });

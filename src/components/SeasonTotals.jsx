@@ -1,7 +1,9 @@
 import { useState } from "react";
 
-export default function SeasonTotals({ seasonTotals, color, isGoalie }) {
+export default function SeasonTotals({ seasonTotals, color, isGoalie, textColor }) {
   const [activeTab, setActiveTab] = useState("regular");
+  const [leagueFilter, setLeagueFilter] = useState("all"); // new filter state
+
 
   const regularSeasons = seasonTotals.filter((s) => s.gameTypeId === 2);
   const playoffSeasons = seasonTotals.filter((s) => s.gameTypeId === 3);
@@ -12,45 +14,47 @@ export default function SeasonTotals({ seasonTotals, color, isGoalie }) {
   ];
 
   const skaterColumns = [
-    "season",
-    "teamName",
-    "leagueAbbrev",
-    "gamesPlayed",
-    "goals",
-    "assists",
-    "points",
-    "plusMinus",
-    "shots",
-    "shootingPctg",
-    "powerPlayGoals",
-    "powerPlayPoints",
-    "shorthandedGoals",
-    "shorthandedPoints",
-    "gameWinningGoals",
-    "otGoals",
-    "pim",
-    "avgToi",
-    "faceoffWinningPctg",
-  ];
+  { key: "season", label: "Season" },
+  { key: "teamName", label: "Team" },
+  { key: "leagueAbbrev", label: "League" },
+  { key: "gamesPlayed", label: "GP" },
+  { key: "goals", label: "Goals" },
+  { key: "assists", label: "Assists" },
+  { key: "points", label: "Points" },
+  { key: "plusMinus", label: "+/-" },
+  { key: "shots", label: "Shots" },
+  { key: "shootingPctg", label: "S%" }, // Shooting Percentage
+  { key: "powerPlayGoals", label: "PPG" },
+  { key: "powerPlayPoints", label: "PPP" },
+  { key: "shorthandedGoals", label: "SHG" },
+  { key: "shorthandedPoints", label: "SHP" },
+  { key: "gameWinningGoals", label: "GWG" },
+  { key: "otGoals", label: "OTG" },
+  { key: "faceoffWinningPctg", label: "FO%" }, // Faceoff %
+  { key: "avgToi", label: "ATOI" }, // Average Time on Ice
+  { key: "pim", label: "PIM" }, // Penalty Minutes
+];
+
 
   const goalieColumns = [
-    "season",
-    "teamName",
-    "leagueAbbrev",
-    "gamesPlayed",
-    "gamesStarted",
-    "wins",
-    "losses",
-    "otLosses",
-    "shotsAgainst",
-    "goalsAgainst",
-    "goalsAgainstAvg",
-    "savePctg",
-    "shutouts",
-    "timeOnIce",
-    "assists",
-    "pim",
-  ];
+  { key: "season", label: "Season" },
+  { key: "teamName", label: "Team" },
+  { key: "leagueAbbrev", label: "League" },
+  { key: "gamesPlayed", label: "GP" },
+  { key: "gamesStarted", label: "GS" },
+  { key: "wins", label: "W" },
+  { key: "losses", label: "L" },
+  { key: "otLosses", label: "OTL" },
+  { key: "savePctg", label: "SV%" },
+  { key: "goalsAgainstAvg", label: "GAA" },
+  { key: "shutouts", label: "SO" },
+  { key: "shotsAgainst", label: "SA" },
+  { key: "goalsAgainst", label: "GA" },
+  { key: "timeOnIce", label: "TOI" },
+  { key: "assists", label: "Assists" },
+  { key: "pim", label: "PIM" },
+];
+
 
   const columns = isGoalie ? goalieColumns : skaterColumns;
 
@@ -79,6 +83,13 @@ export default function SeasonTotals({ seasonTotals, color, isGoalie }) {
     return val;
   };
 
+  const activeTabData = tabs.find((t) => t.key === activeTab).data;
+  const filteredData =
+    leagueFilter === "nhl"
+      ? activeTabData.filter((row) => row.leagueAbbrev === "NHL")
+      : activeTabData;
+
+
   return (
     <div>
       {/* Tabs */}
@@ -101,32 +112,44 @@ export default function SeasonTotals({ seasonTotals, color, isGoalie }) {
         })}
       </div>
 
+      {/* League Filter */}
+      <div className="mb-6 flex items-center space-x-3">
+        <label className="text-sm md:text-base font-semibold text-gray-700">League:</label>
+        <select
+          value={leagueFilter}
+          onChange={(e) => setLeagueFilter(e.target.value)}
+          className="border rounded px-2 py-1"
+        >
+          <option value="all">All Leagues</option>
+          <option value="nhl">NHL Only</option>
+        </select>
+      </div>
+
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-2xl shadow-md border border-gray-200">
         <table className="min-w-full border-collapse text-sm">
           <thead>
-            <tr className="bg-gray-100">
+            <tr style={{ backgroundColor: color, color: textColor }}>
               {columns.map((col) => (
                 <th
-                  key={col}
-                  className="px-3 py-2 text-left border-b whitespace-nowrap"
+                  key={col.key}
+                  className="px-4 py-3 text-left font-semibold whitespace-nowrap"
                 >
-                  {col}
+                  {col.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {tabs
-              .find((t) => t.key === activeTab)
-              .data.map((row, i) => (
-                <tr key={i} className="hover:bg-gray-50">
+
+          <tbody className="divide-y divide-gray-200 bg-white">
+            {filteredData.map((row, i) => (
+                <tr key={i} className="border-b border-gray-200 hover:bg-gray-100 transition-colors:bg-gray-50 transition-colors">
                   {columns.map((col) => (
                     <td
-                      key={col}
-                      className="px-3 py-2 border-b whitespace-nowrap"
+                      key={`${i}-${col.key}`}
+                      className="px-4 py-3 whitespace-nowrap text-gray-800"
                     >
-                      {formatValue(col, row[col], row)}
+                      {formatValue(col.key, row[col.key], row)}
                     </td>
                   ))}
                 </tr>

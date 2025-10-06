@@ -33,15 +33,14 @@ export default function Calendar({ games, abbr, color, textColor }) {
     };
   });
 
+
   const getGamesForDay = (day) =>
     formattedGames.filter((g) => {
-      const d = new Date(g.date);
-      return (
-        d.getDate() === day &&
-        d.getMonth() === currentMonth &&
-        d.getFullYear() === currentYear
-      );
+      if (!g.date) return false;
+      const [gy, gm, gd] = g.date.split("-").map(Number);
+      return gy === currentYear && gm - 1 === currentMonth && gd === day;
     });
+
 
   const goPrev = () => {
     if (currentMonth === 0) {
@@ -129,16 +128,18 @@ export default function Calendar({ games, abbr, color, textColor }) {
                     const vsOrAt = g.isHome ? "vs" : "@";
 
                     const displayTime =
-                    g.score
-                        ? `${teamScore}-${opponentScore} ${g.outcome !== "REG" ? g.outcome : ""}`
-                        : g.state !== "FINAL" && g.state !== "POSTPONED"
-                        ? new Date(g.startTimeUTC).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                            timeZoneName: "short",
-                        })
-                        : g.state;
+                        g.state === "LIVE"
+                          ? `${teamScore}-${opponentScore} LIVE`
+                          : g.score
+                          ? `${teamScore}-${opponentScore} ${g.outcome !== "REG" ? g.outcome : ""}`
+                          : g.state !== "FINAL" && g.state !== "POSTPONED"
+                          ? new Date(g.startTimeUTC).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                              timeZoneName: "short",
+                            })
+                          : g.state;
 
                     return (
                     <div

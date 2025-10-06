@@ -3,27 +3,68 @@ import { useEffect, useState } from "react";
 import teamColors from "../data/teamColors";
 import StatsTabs from "../components/StatsTabs";
 import SeasonTotals from "../components/SeasonTotals";
+import SkaterPerformanceChart from "../components/charts/SkaterPerformanceChart";
+import GoaliePerformanceChart from "../components/charts/GoaliePerformanceChart";
+import SummaryStats from "../components/SummaryStats";
+import FaceoffRadarChart from "../components/charts/FaceoffRadarChart";
 
 export default function PlayerPage() {
   const { id } = useParams();
   const [playerData, setPlayerData] = useState(null);
+  const [summaryData, setSummaryData] = useState(null);
+  const [faceoffData, setFaceoffData] = useState(null);
+
+
 
   useEffect(() => {
-    async function fetchPlayer() {
-      try {
-        const res = await fetch(`/api/player/${id}/landing`);
-        const data = await res.json();
-        setPlayerData(data);
-      } catch (err) {
-        console.error("Error fetching player landing:", err);
+     console.log("Mounted PlayerPage");
+
+  async function fetchPlayer() {
+    try {
+      const res = await fetch(`/api/player/${id}/landing`);
+      if (!res.ok) throw new Error("Failed to fetch landing");
+      const data = await res.json();
+      console.log("Landing data:", data);
+      setPlayerData(data);
+
+      const type = data.position === "G" ? "goalie" : "skater";
+      const seasonId = 20242025;
+
+      const summaryRes = await fetch(`http://localhost:5000/api/stats/${type}/summary/${id}/${seasonId}`);
+      if (!summaryRes.ok) {
+        const text = await summaryRes.text();
+        throw new Error(`Summary fetch failed: ${summaryRes.status} - ${text}`);
+      }
+      const summaryJson = await summaryRes.json();
+      console.log("Summary data:", summaryJson);
+      setSummaryData(summaryJson);
+
+      if (data.position !== "G") {
+      const ftaRes = await fetch(`http://localhost:5000/api/stats/skater/faceoffpercentages/${id}/20242025`);
+      if (ftaRes.ok) {
+        const ftaJson = await ftaRes.json();
+        console.log("Faceoff data:", ftaJson);
+        if (ftaJson.data && ftaJson.data.length > 0) {
+          setFaceoffData(ftaJson.data[0]);
+        }
       }
     }
-    fetchPlayer();
-  }, [id]);
+
+    } catch (err) {
+      console.error("Error fetching player or summary:", err);
+    }
+  }
+
+  if (id) fetchPlayer();
+
+  return () => console.log("Unmounted PlayerPage");
+}, [id]);
 
   if (!playerData) {
     return <div className="text-center mt-10">Loading player data...</div>;
   }
+  
+  
 
   const {
     currentTeamAbbrev,
@@ -48,15 +89,55 @@ export default function PlayerPage() {
   } = playerData;
 
   const isGoalie = position === "G";
-  console.log(position)
+  const isCenter = position === "C";
+
+  let summaryStats = {};
+  if (summaryData && summaryData.data && summaryData.data.length > 0){
+  const stats = summaryData.data[0]; 
+  if (isGoalie) {
+    summaryStats = {
+      seasonId: stats.seasonId,
+      gamesPlayed: stats.gamesPlayed,
+      gamesStarted: stats.gamesStarted,
+      wins: stats.wins,
+      losses: stats.losses,
+      otLosses: stats.otLosses,
+      savePct: stats.savePct,
+      gaa: stats.goalsAgainstAverage,
+      shutouts: stats.shutouts,
+      saves: stats.saves,
+      shotsAgainst: stats.shotsAgainst,
+    };
+  } else {
+    summaryStats = {
+      seasonId: stats.seasonId,
+      gamesPlayed: stats.gamesPlayed,
+      goals: stats.goals,
+      assists: stats.assists,
+      points: stats.points,
+      plusMinus: stats.plusMinus,
+      shots: stats.shots,
+      shootingPct: stats.shootingPct,
+      ppGoals: stats.ppGoals,
+      ppPoints: stats.ppPoints,
+      shGoals: stats.shGoals,
+      shPoints: stats.shPoints,
+      pointsPerGame: stats.pointsPerGame,
+      gameWinningGoals: stats.gameWinningGoals,
+      otGoals: stats.otGoals,
+      faceoffWinPct: isCenter ? stats.faceoffWinPct : null,
+      };
+    }
+  }
+
 
   const defaultColor = "#1d1d1d"; // fallback
   const color = teamColors[currentTeamAbbrev]?.primary || defaultColor;
   const textColor = teamColors[currentTeamAbbrev]?.secondary || "#fff";
+  console.log("Team:", currentTeamAbbrev, "Colors:", teamColors[currentTeamAbbrev]);
 
   return (
     <div className="min-h-screen bg-white relative">
-      {/* Vertical color stripe */}
       <div
         className="absolute left-0 top-0 h-full"
         style={{
@@ -64,13 +145,11 @@ export default function PlayerPage() {
           backgroundColor: color,
         }}
       />
-    {/* Hero Banner */}
     <div
       className="w-full flex flex-col md:flex-row items-center md:items-start justify-center py-12 px-6 gap-8"
       style={{ backgroundColor: color }}
     >
   
-    {/* Headshot */}
     {headshot && (
       <div className="flex-shrink-0 flex justify-center">
         <img
@@ -87,7 +166,6 @@ export default function PlayerPage() {
       </div>
     )}
 
-    {/* Player Info + Bio */}
     <div className="text-center md:text-left space-y-3" style={{ color: textColor }}>
       <h1 className="text-3xl md:text-4xl font-bold">
         {firstName.default} {lastName.default}
@@ -96,7 +174,6 @@ export default function PlayerPage() {
         #{sweaterNumber} • {position} • {fullTeamName.default}
       </p>
 
-    {/* Bio */}
     <div className="text-base md:text-lg space-y-1">
       <p>
         {heightInCentimeters} cm • {weightInKilograms} kg • Shoots {shootsCatches}
@@ -115,18 +192,44 @@ export default function PlayerPage() {
   </div>
 </div>
 
-    {/* Content Section */}
     <div className="max-w-5xl mx-auto p-6 space-y-8">
       
       <section>
         <h2 className="text-2xl font-semibold mb-4">Featured Stats</h2>
         <StatsTabs featuredStats={featuredStats} isGoalie={isGoalie} color={color} />
       </section>
+      
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Summary Stats</h2>
+        {summaryStats && (
+          <SummaryStats summaryStats={summaryStats} isGoalie={isGoalie} />)}
+      </section>
 
+      
       <section>
         <h2 className="text-2xl font-semibold mb-4">Season Totals</h2>
-        <SeasonTotals seasonTotals={seasonTotals} color={color} isGoalie={isGoalie} />
+        <SeasonTotals seasonTotals={seasonTotals} color={color} isGoalie={isGoalie} textColor={textColor} />
       </section>
+      
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">
+          {isGoalie ? "Workload vs Efficiency" : "Points by NHL Season"}
+        </h2>
+
+        {isGoalie ? (
+           <GoaliePerformanceChart seasonTotals={seasonTotals} color={color} textColor={textColor}/>
+        ) : (
+          <SkaterPerformanceChart seasonTotals={seasonTotals} color={color} textColor={textColor}/>
+        )}
+      </section>
+
+      {!isGoalie && isCenter && faceoffData && (
+        <section className="mt-12">
+          <FaceoffRadarChart faceoffData={faceoffData} color={color} />
+        </section>
+      )}
+
+
 
     </div>
   </div>
