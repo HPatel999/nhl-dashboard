@@ -78,8 +78,6 @@ app.get("/api/player/:id/landing", async (req, res) => {
 
 app.get("/api/stats/:type/:endpoint/:id/:seasonId", async (req, res) => {
   const { type, endpoint, id, seasonId } = req.params;
-
-
   const cayenneExpr = encodeURIComponent(`playerId=${id} and seasonId=${seasonId}` );
   try {
     const url = `https://api.nhle.com/stats/rest/en/${type}/${endpoint}?cayenneExp=${cayenneExpr}`;

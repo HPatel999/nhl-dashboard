@@ -7,12 +7,20 @@ import SkaterPerformanceChart from "../components/charts/SkaterPerformanceChart"
 import GoaliePerformanceChart from "../components/charts/GoaliePerformanceChart";
 import SummaryStats from "../components/SummaryStats";
 import FaceoffRadarChart from "../components/charts/FaceoffRadarChart";
+import ShootingTypeandGoalRadarChart from "../components/charts/ShootingTypeandGoalRadarChart";
+import GoalDistributionRadarChart from "../components/charts/GoalDistributionRadarChart";
+import ShootingPercentageRadarChart from "../components/charts/ShootingPercentageRadarChart";
+import { transformShotTypeData,transformSpecialTeamsData } from "../utils/helper";
+import SpecialTeamsStats from "../components/SpecialTeamsStats";
 
 export default function PlayerPage() {
   const { id } = useParams();
   const [playerData, setPlayerData] = useState(null);
   const [summaryData, setSummaryData] = useState(null);
   const [faceoffData, setFaceoffData] = useState(null);
+  const [shotTypeData, setShotTypeData] = useState(null);
+  const [specialTeams, setSpecialTeams] = useState({ pp: null, pk: null });
+
 
 
 
@@ -39,8 +47,8 @@ export default function PlayerPage() {
       console.log("Summary data:", summaryJson);
       setSummaryData(summaryJson);
 
-      if (data.position !== "G") {
-      const ftaRes = await fetch(`http://localhost:5000/api/stats/skater/faceoffpercentages/${id}/20242025`);
+      if (type !== "G") {
+      const ftaRes = await fetch(`http://localhost:5000/api/stats/${type}/faceoffpercentages/${id}/20242025`);
       if (ftaRes.ok) {
         const ftaJson = await ftaRes.json();
         console.log("Faceoff data:", ftaJson);
@@ -48,6 +56,30 @@ export default function PlayerPage() {
           setFaceoffData(ftaJson.data[0]);
         }
       }
+      const stres = await fetch(`http://localhost:5000/api/stats/${type}/shottype/${id}/20242025`);
+      if (stres.ok) {
+        const stjson = await stres.json();
+        if (stjson.data && stjson.data.length > 0) {
+          console.log("Shot Type data:", stjson);
+          const transformed = transformShotTypeData(stjson.data[0]);
+          setShotTypeData(transformed);
+        }
+      }
+      const ppRes = await fetch(`http://localhost:5000/api/stats/${type}/powerplay/${id}/20242025`);
+      const pkRes = await fetch(`http://localhost:5000/api/stats/${type}/penaltykill/${id}/20242025`);
+
+      if (ppRes.ok && pkRes.ok) {
+          const ppJson = await ppRes.json();
+          const pkJson = await pkRes.json();
+          const ppData = ppJson?.data?.[0];
+          const pkData = pkJson?.data?.[0];
+          console.log("PP:", ppJson);
+          console.log("PK:", pkJson);
+          const transformed = transformSpecialTeamsData(ppData, pkData);
+          setSpecialTeams(transformed);
+        }
+
+
     }
 
     } catch (err) {
@@ -63,7 +95,7 @@ export default function PlayerPage() {
   if (!playerData) {
     return <div className="text-center mt-10">Loading player data...</div>;
   }
-  
+
   
 
   const {
@@ -131,7 +163,7 @@ export default function PlayerPage() {
   }
 
 
-  const defaultColor = "#1d1d1d"; // fallback
+  const defaultColor = "#1d1d1d"; 
   const color = teamColors[currentTeamAbbrev]?.primary || defaultColor;
   const textColor = teamColors[currentTeamAbbrev]?.secondary || "#fff";
   console.log("Team:", currentTeamAbbrev, "Colors:", teamColors[currentTeamAbbrev]);
@@ -229,7 +261,26 @@ export default function PlayerPage() {
         </section>
       )}
 
+      {!isGoalie && shotTypeData && (
+        <section className="mt-12">
+          <h2 className="text-2xl font-semibold mb-4">Shooting Type Analysis</h2>
+          <GoalDistributionRadarChart radarData={shotTypeData} color={color} />
+          <ShootingPercentageRadarChart radarData={shotTypeData} color={color} />
+        </section>
+      )}
 
+       {!isGoalie &&
+    specialTeams &&
+    (specialTeams.pp || specialTeams.pk) && (
+      <section className="mt-12">
+        <h2 className="text-2xl font-semibold mb-4">Special Teams Analysis</h2>
+        <SpecialTeamsStats
+          data={specialTeams}
+          primaryColor={color}
+          textColor={textColor}
+        />
+      </section>
+    )}
 
     </div>
   </div>

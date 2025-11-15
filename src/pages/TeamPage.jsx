@@ -9,6 +9,10 @@ import FaceoffPercentagesByZone from "../components/charts/FaceoffWinByZoneChart
 import GoalsByPeriodChart from "../components/charts/GoalsByPeriodChart";
 import ShootingTypeandGoalRadarChart from "../components/charts/ShootingTypeandGoalRadarChart";
 import Calendar from "../components/Calendar";
+import GoalDistributionRadarChart from "../components/charts/GoalDistributionRadarChart";
+import ShootingPercentageRadarChart from "../components/charts/ShootingPercentageRadarChart";
+import { transformShotTypeData } from "../utils/helper";
+
 
 export default function TeamPage() {
   const { abbr } = useParams();
@@ -284,8 +288,8 @@ const winTypesData = teamData
           src={teamData.logo}
           alt={teamData.team_name}
           style={{
-            width: "clamp(120px, 20vw, 30vw)",  // min 120px, grows with viewport, max 30% of screen
-            height: "auto",                       // keeps aspect ratio
+            width: "clamp(120px, 20vw, 30vw)", 
+            height: "auto",                      
           }}
         />
       </div>
@@ -486,15 +490,15 @@ const winTypesData = teamData
     </div>
   </div>
    
-    {/* Shooting Efficiency vs Goals */}
+    {/* Shooting Type  and  Goals */}
   <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
-    <h3 className="text-xl font-semibold mb-4 text-center">
-      Shooting Efficiency and Goals By Type
-    </h3>
+    <h3 className="text-xl font-semibold mb-6 text-center"> Shooting Analysis</h3>
     <div className="w-full max-w-md">
-      <ShootingTypeandGoalRadarChart radarData={radarData} color = {color}/>
+      <ShootingTypeandGoalRadarChart radarData={radarData} color={color} />
     </div>
   </div>
+
+ 
 
 </section>
       

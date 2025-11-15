@@ -58,7 +58,6 @@ export default function SeasonTotals({ seasonTotals, color, isGoalie, textColor 
 
   const columns = isGoalie ? goalieColumns : skaterColumns;
 
-  // Helpers
   const formatSeason = (season) =>
     season ? `${String(season).slice(0, 4)}-${String(season).slice(4)}` : "—";
 
@@ -92,7 +91,6 @@ export default function SeasonTotals({ seasonTotals, color, isGoalie, textColor 
 
   return (
     <div>
-      {/* Tabs */}
       <div className="flex space-x-4 border-b mb-4">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.key;
@@ -112,7 +110,6 @@ export default function SeasonTotals({ seasonTotals, color, isGoalie, textColor 
         })}
       </div>
 
-      {/* League Filter */}
       <div className="mb-6 flex items-center space-x-3">
         <label className="text-sm md:text-base font-semibold text-gray-700">League:</label>
         <select
@@ -125,7 +122,6 @@ export default function SeasonTotals({ seasonTotals, color, isGoalie, textColor 
         </select>
       </div>
 
-      {/* Table */}
       <div className="overflow-x-auto rounded-2xl shadow-md border border-gray-200">
         <table className="min-w-full border-collapse text-sm">
           <thead>

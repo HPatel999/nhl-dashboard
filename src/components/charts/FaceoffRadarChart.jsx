@@ -25,12 +25,12 @@ export default function FaceoffRadarChart({ faceoffData, color }) {
   if (radarData.length === 0) return null;
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <h2 className="text-2xl font-semibold mb-3 text-gray-800">
+    <div className="flex-col w-full">
+      <h2 className="text-2xl font-semibold mb-4">
         Faceoff Win % by Zone
       </h2>
 
-      <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-md border border-gray-100 p-6 w-full max-w-3xl">
+      <div className="bg-white/70 backdrop-blur-xl rounded-2xl shadow-md border border-gray-100 p-6 w-full">
         <ResponsiveContainer width="100%" height={350}>
           <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
             <PolarGrid stroke="#e5e7eb" />
