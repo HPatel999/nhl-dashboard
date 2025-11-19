@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import teamColors from "../data/teamColors";
+import { usePageTransition } from "../transitions/usePageTransition";
 
 
 
@@ -66,6 +67,21 @@ export default function Home() {
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { showTransition, hideTransition } = usePageTransition();
+
+  const handleTeamClick = (team) => {
+      const colors = teamColors[team.teamAbbrev.default];
+
+      showTransition({
+        name: team.teamName.default,
+        image: team.teamLogo,
+        primaryColor: colors.primary,
+        textColor: colors.secondary,
+      });
+
+        navigate(`/team/${team.teamAbbrev.default}`);
+      
+    };
 
   useEffect(() => {
     async function fetchStandings() {
@@ -77,6 +93,7 @@ export default function Home() {
       } catch (err) {
         setError(err.message);
       } finally {
+        hideTransition();
         setLoading(false);
       }
     }
@@ -147,7 +164,7 @@ export default function Home() {
             isOtherHovered={hoveredIdx !== null && hoveredIdx !== i}
             onHover={() => setHoveredIdx(i)}
             onLeave={() => setHoveredIdx(null)}
-            onClick={() => navigate(`/team/${team.teamAbbrev.default}`)}
+            onClick={() =>  handleTeamClick(team)}
           />
         ))}
       </section>

@@ -1,8 +1,34 @@
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { usePageTransition } from "../transitions/usePageTransition";
+import teamColors from "../data/teamColors";
+
 export default function RosterCard({ player }) {
+  const navigate = useNavigate();
+  const { showTransition } = usePageTransition();
+
+  const handleClick = () => {
+    const colors = teamColors[player.team_abbr] || {
+      primary: "#1d1d1d",
+      secondary: "#ffffff",
+    };
+
+    showTransition({
+      name: player.player,
+      image: player.headshot,
+      primaryColor: colors.primary,
+      textColor: colors.secondary,
+    });
+
+    setTimeout(() => {
+      navigate(`/player/${player.player_id}`);
+    }, 550); 
+  };
+
   return (
-    <Link to={`/player/${player.player_id}`}>
-    <div className="border p-2 rounded hover:shadow-lg transition text-center bg-white">
+    <div
+      onClick={handleClick}
+      className="cursor-pointer border p-2 rounded hover:shadow-lg transition text-center bg-white"
+    >
       {player.headshot ? (
         <img
           src={player.headshot}
@@ -14,10 +40,10 @@ export default function RosterCard({ player }) {
           N/A
         </div>
       )}
+
       <p className="font-semibold">{player.player}</p>
       <p>#{player.sweaterNumber || "—"}</p>
       <p>{player.positionCode || "—"}</p>
     </div>
-    </Link>
   );
 }

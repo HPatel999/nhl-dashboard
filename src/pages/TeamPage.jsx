@@ -12,6 +12,8 @@ import Calendar from "../components/Calendar";
 import GoalDistributionRadarChart from "../components/charts/GoalDistributionRadarChart";
 import ShootingPercentageRadarChart from "../components/charts/ShootingPercentageRadarChart";
 import { transformShotTypeData } from "../utils/helper";
+import BackButton from "../components/BackButton";
+import { usePageTransition } from "../transitions/usePageTransition";
 
 
 export default function TeamPage() {
@@ -23,6 +25,7 @@ export default function TeamPage() {
   const [goalsByPeriodData, setGoalsByPeriodData] = useState([]);
   const [radarData, setRadarData] = useState([]);
   const [games, setGames] = useState([]);
+  const { hideTransition } = usePageTransition();
 
 
 
@@ -192,6 +195,7 @@ export default function TeamPage() {
         setFaceoffData(faceoffMapped);
         setRoster(rosterMapped);
         setLoading(false);
+        hideTransition();
       } catch (err) {
         console.error(err);
         setLoading(false);
@@ -267,12 +271,20 @@ const winTypesData = teamData
 
     
   <div className="min-h-screen bg-white relative" style={{paddingLeft:"10px"}}>
+    <BackButton
+          transitionData={{
+            name: 'NHL Standings',
+            image: null,
+            primaryColor: '#1a1a1a',
+            textColor: "#ffffff"
+          }}
+        />
   {/* Vertical color stripe */}
   <div
     className="absolute left-0 top-0 h-full"
     style={{
-      width: "10px", // thickness of the stripe
-      backgroundColor: color, // use the team's primary color
+      width: "10px", 
+      backgroundColor: color, 
     }}
   />
 

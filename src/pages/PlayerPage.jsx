@@ -12,6 +12,8 @@ import GoalDistributionRadarChart from "../components/charts/GoalDistributionRad
 import ShootingPercentageRadarChart from "../components/charts/ShootingPercentageRadarChart";
 import { transformShotTypeData,transformSpecialTeamsData } from "../utils/helper";
 import SpecialTeamsStats from "../components/SpecialTeamsStats";
+import BackButton from "../components/BackButton";
+import { usePageTransition } from "../transitions/usePageTransition";
 
 export default function PlayerPage() {
   const { id } = useParams();
@@ -20,6 +22,8 @@ export default function PlayerPage() {
   const [faceoffData, setFaceoffData] = useState(null);
   const [shotTypeData, setShotTypeData] = useState(null);
   const [specialTeams, setSpecialTeams] = useState({ pp: null, pk: null });
+  const { hideTransition } = usePageTransition();
+
 
 
 
@@ -85,6 +89,9 @@ export default function PlayerPage() {
     } catch (err) {
       console.error("Error fetching player or summary:", err);
     }
+    finally {
+    hideTransition();
+  }
   }
 
   if (id) fetchPlayer();
@@ -118,6 +125,7 @@ export default function PlayerPage() {
     featuredStats,
     last5Games,
     seasonTotals,
+    teamLogo,
   } = playerData;
 
   const isGoalie = position === "G";
@@ -170,6 +178,14 @@ export default function PlayerPage() {
 
   return (
     <div className="min-h-screen bg-white relative">
+      <BackButton
+        transitionData={{
+          name: playerData.fullTeamName.default,
+          image: playerData.teamLogo,
+          primaryColor: color,
+          textColor: textColor
+        }}
+      />
       <div
         className="absolute left-0 top-0 h-full"
         style={{
