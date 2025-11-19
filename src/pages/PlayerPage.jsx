@@ -13,6 +13,7 @@ import ShootingPercentageRadarChart from "../components/charts/ShootingPercentag
 import { transformShotTypeData,transformSpecialTeamsData } from "../utils/helper";
 import SpecialTeamsStats from "../components/SpecialTeamsStats";
 import BackButton from "../components/BackButton";
+import BackToTop from "../components/BackToTop";
 import { usePageTransition } from "../transitions/usePageTransition";
 
 export default function PlayerPage() {
@@ -185,7 +186,11 @@ export default function PlayerPage() {
           primaryColor: color,
           textColor: textColor
         }}
+        buttonTextColor={textColor}
+
       />
+      <BackToTop primaryColor={color} textColor={textColor} />
+    
       <div
         className="absolute left-0 top-0 h-full"
         style={{

@@ -13,6 +13,7 @@ import GoalDistributionRadarChart from "../components/charts/GoalDistributionRad
 import ShootingPercentageRadarChart from "../components/charts/ShootingPercentageRadarChart";
 import { transformShotTypeData } from "../utils/helper";
 import BackButton from "../components/BackButton";
+import BackToTop from "../components/BackToTop";
 import { usePageTransition } from "../transitions/usePageTransition";
 
 
@@ -278,7 +279,10 @@ const winTypesData = teamData
             primaryColor: '#1a1a1a',
             textColor: "#ffffff"
           }}
+          buttonTextColor={textColor}
         />
+    <BackToTop primaryColor={color} textColor={textColor} />
+
   {/* Vertical color stripe */}
   <div
     className="absolute left-0 top-0 h-full"
