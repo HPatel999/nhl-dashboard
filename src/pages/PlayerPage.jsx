@@ -14,7 +14,11 @@ import { transformShotTypeData,transformSpecialTeamsData } from "../utils/helper
 import SpecialTeamsStats from "../components/SpecialTeamsStats";
 import BackButton from "../components/BackButton";
 import BackToTop from "../components/BackToTop";
+import PuckPossessionStats from "../components/statsTooltip/PuckPossessionStats";
+import PossessionPercentages from "../components/statsTooltip/PossessionPercentages";
 import { usePageTransition } from "../transitions/usePageTransition";
+import ScoringRateStats from "../components/statsTooltip/ScoringRateStats";
+
 
 export default function PlayerPage() {
   const { id } = useParams();
@@ -23,6 +27,9 @@ export default function PlayerPage() {
   const [faceoffData, setFaceoffData] = useState(null);
   const [shotTypeData, setShotTypeData] = useState(null);
   const [specialTeams, setSpecialTeams] = useState({ pp: null, pk: null });
+  const [deploymentData,setDeploymentData] = useState(null);
+  const [v5Data, set5V5data] = useState(null);
+  const [satData,setSatData] = useState(null);
   const { hideTransition } = usePageTransition();
 
 
@@ -83,6 +90,30 @@ export default function PlayerPage() {
           const transformed = transformSpecialTeamsData(ppData, pkData);
           setSpecialTeams(transformed);
         }
+
+      const deploymentRes = await fetch(`http://localhost:5000/api/stats/${type}/puckPossessions/${id}/20242025`);
+      if (deploymentRes.ok){
+        const deploymentJson = await deploymentRes.json();
+        const deploymentData = deploymentJson?.data?.[0];
+        console.log("deployment:",deploymentData);
+        setDeploymentData(deploymentData);
+      }
+
+      const v5Res = await fetch(`http://localhost:5000/api/stats/${type}/scoringRates/${id}/20242025`);
+      if (v5Res.ok){
+        const v5Json = await v5Res.json();
+        const v5Data = v5Json?.data?.[0];
+        console.log("5v5 Data:", v5Data);
+        set5V5data(v5Data);
+      }
+      const satRes = await fetch(`http://localhost:5000/api/stats/${type}/percentages/${id}/20242025`);
+      if (satRes.ok){
+        const satJson = await satRes.json();
+        const satData = satJson?.data?.[0];
+        console.log("SAT/USAT Data:", satData);
+        setSatData(satData);
+      }
+
 
 
     }
@@ -302,6 +333,15 @@ export default function PlayerPage() {
         />
       </section>
     )}
+
+    {!isGoalie && deploymentData && v5Data &&(
+        <section className="mt-12">
+          <h2 className="text-2xl font-semibold mb-4">Analytics</h2>
+          <PuckPossessionStats data={deploymentData}  primaryColor={color} textColor={textColor}/>
+          <ScoringRateStats data={v5Data}  primaryColor={color} textColor={textColor}/>
+         <PossessionPercentages data={satData} primaryColor={color} textColor={textColor}/>
+        </section>
+      )}
 
     </div>
   </div>
