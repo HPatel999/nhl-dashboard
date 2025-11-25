@@ -21,6 +21,7 @@ import ScoringRateStats from "../components/statsTooltip/ScoringRateStats";
 import SavesByStrength from "../components/goalieStats/SavesByStrength";
 import DaysRestStats from "../components/goalieStats/DaysRestStats";
 import StartedVsRelievedStats from "../components/goalieStats/StartedVsRelievedStats";
+import ShootoutStats from "../components/goalieStats/ShootoutStats";
 
 export default function PlayerPage() {
   const { id } = useParams();
@@ -35,7 +36,9 @@ export default function PlayerPage() {
   const [svByStrength, setSvByStrength] = useState(null);
   const [daysRestData,setDaysRestData] = useState(null);
   const [startVsRelievedData, setStartVsRelieved] = useState(null);
+  const [shootoutData, setShootOutData] = useState(null);
   const { hideTransition } = usePageTransition();
+
 
 
 
@@ -145,6 +148,14 @@ export default function PlayerPage() {
           const startVsRelToSet = startVsRelJson?.data?.[0];
           console.log("Started vs Relieved:", startVsRelToSet);
           setStartVsRelieved(startVsRelToSet);
+        }
+
+        const shootoutRes = await fetch (`http://localhost:5000/api/stats/${type}/shootout/${id}/20242025`);
+        if (shootoutRes.ok){
+          const shootoutJson = await shootoutRes.json();
+          const shootoutToSet = shootoutJson?.data?.[0];
+          console.log("Shootout Data:",  shootoutToSet);
+          setShootOutData(shootoutToSet);
         }
 
       }
@@ -374,12 +385,13 @@ export default function PlayerPage() {
         </section>
       )}
     
-    {isGoalie && svByStrength && daysRestData && startVsRelievedData &&(
+    {isGoalie && svByStrength && daysRestData && startVsRelievedData && shootoutData &&(
         <section className="mt-12">
           <h2 className="text-2xl font-semibold mb-4">Analytics</h2>
           <SavesByStrength data={svByStrength}  primaryColor={color} textColor={textColor}/>
           <DaysRestStats data = {daysRestData} primaryColor={color} textColor={textColor}/>
           <StartedVsRelievedStats data = {startVsRelievedData} primaryColor={color} textColor={textColor}/>
+          <ShootoutStats data = {shootoutData} primaryColor={color} textColor={textColor} />
         </section>
 
     ) }
@@ -389,20 +401,4 @@ export default function PlayerPage() {
   );
 }
 
-function InfoCard({ label, value }) {
-  return (
-    <div className="bg-white p-4 rounded-lg shadow text-center">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="font-semibold">{value || "—"}</p>
-    </div>
-  );
-}
 
-function StatCard({ label, value }) {
-  return (
-    <div className="bg-white p-4 rounded-lg shadow text-center">
-      <p className="text-sm text-gray-500">{label}</p>
-      <p className="text-xl font-bold">{value ?? "—"}</p>
-    </div>
-  );
-}

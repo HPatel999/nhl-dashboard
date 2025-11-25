@@ -197,9 +197,9 @@ export default function TeamPage() {
   };
   }, [abbr]);
 
-  if (loading) return <p className="p-6">Loading...</p>;
-  if (!teamData) return <p className="p-6">Team not found.</p>;
-  if (!faceoffData) return <p className="p-6">Faceoff Stats N/A.</p>;
+  if (loading) return <p className="flex h-screen w-screen items-center justify-center ">Loading... Using the provided Buttons/Navigation tools would have shown you a cool animation.</p>;
+  if (!teamData) return <p className="flex h-screen w-screen items-center justify-center">Team not found.</p>;
+  if (!faceoffData) return <p className="flex h-screen w-screen items-center justify-center">Faceoff Stats N/A.</p>;
 
 
   const defaultColor = "#1d1d1d"; // fallback

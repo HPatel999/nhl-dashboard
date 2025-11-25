@@ -13,7 +13,7 @@ export default function WinTypesDonut({ winTypesData, color }) {
           dataKey="value"
           nameKey="name"
           innerRadius= "40%"
-          outerRadius="80%"
+          outerRadius="60%"
           paddingAngle={3}
           label
         >
@@ -22,7 +22,7 @@ export default function WinTypesDonut({ winTypesData, color }) {
           ))}
         </Pie>
         <Tooltip />
-        <Legend layout="vertical" align="left" verticalAlign="left" />
+        <Legend layout="horizontal" align="left" verticalAlign="left" />
       </PieChart>
     </ResponsiveContainer>
   );
