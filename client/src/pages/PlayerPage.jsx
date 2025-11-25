@@ -59,7 +59,7 @@ export default function PlayerPage() {
       console.log("Type", type);
       const seasonId = 20242025;
 
-      const summaryRes = await fetch(`http://localhost:5000/api/stats/${type}/summary/${id}/${seasonId}`);
+      const summaryRes = await fetch(`/api/stats/${type}/summary/${id}/${seasonId}`);
       if (!summaryRes.ok) {
         const text = await summaryRes.text();
         throw new Error(`Summary fetch failed: ${summaryRes.status} - ${text}`);
@@ -69,7 +69,7 @@ export default function PlayerPage() {
       setSummaryData(summaryJson);
 
       if (type !== "goalie") {
-      const ftaRes = await fetch(`http://localhost:5000/api/stats/${type}/faceoffpercentages/${id}/20242025`);
+      const ftaRes = await fetch(`/api/stats/${type}/faceoffpercentages/${id}/20242025`);
       if (ftaRes.ok) {
         const ftaJson = await ftaRes.json();
         console.log("Faceoff data:", ftaJson);
@@ -77,7 +77,7 @@ export default function PlayerPage() {
           setFaceoffData(ftaJson.data[0]);
         }
       }
-      const stres = await fetch(`http://localhost:5000/api/stats/${type}/shottype/${id}/20242025`);
+      const stres = await fetch(`/api/stats/${type}/shottype/${id}/20242025`);
       if (stres.ok) {
         const stjson = await stres.json();
         if (stjson.data && stjson.data.length > 0) {
@@ -86,8 +86,9 @@ export default function PlayerPage() {
           setShotTypeData(transformed);
         }
       }
-      const ppRes = await fetch(`http://localhost:5000/api/stats/${type}/powerplay/${id}/20242025`);
-      const pkRes = await fetch(`http://localhost:5000/api/stats/${type}/penaltykill/${id}/20242025`);
+      const ppRes = await fetch(`/api/stats/${type}/powerplay/${id}/20242025`);
+      const pkRes = await fetch(`/api/stats/${type}/penaltykill/${id}/20242025`);
+
 
       if (ppRes.ok && pkRes.ok) {
           const ppJson = await ppRes.json();
@@ -100,7 +101,7 @@ export default function PlayerPage() {
           setSpecialTeams(transformed);
         }
 
-      const deploymentRes = await fetch(`http://localhost:5000/api/stats/${type}/puckPossessions/${id}/20242025`);
+      const deploymentRes = await fetch(`/api/stats/${type}/puckPossessions/${id}/20242025`);
       if (deploymentRes.ok){
         const deploymentJson = await deploymentRes.json();
         const deploymentData = deploymentJson?.data?.[0];
@@ -108,14 +109,14 @@ export default function PlayerPage() {
         setDeploymentData(deploymentData);
       }
 
-      const v5Res = await fetch(`http://localhost:5000/api/stats/${type}/scoringRates/${id}/20242025`);
+      const v5Res = await fetch(`/api/stats/${type}/scoringRates/${id}/20242025`);
       if (v5Res.ok){
         const v5Json = await v5Res.json();
         const v5Data = v5Json?.data?.[0];
         console.log("5v5 Data:", v5Data);
         set5V5data(v5Data);
       }
-      const satRes = await fetch(`http://localhost:5000/api/stats/${type}/percentages/${id}/20242025`);
+      const satRes = await fetch(`/api/stats/${type}/percentages/${id}/20242025`);
       if (satRes.ok){
         const satJson = await satRes.json();
         const satData = satJson?.data?.[0];
@@ -126,7 +127,7 @@ export default function PlayerPage() {
     }
 
       if (type == "goalie"){
-        const svBySRes = await fetch (`http://localhost:5000/api/stats/${type}/savesByStrength/${id}/20242025`);
+        const svBySRes = await fetch(`/api/stats/${type}/savesByStrength/${id}/20242025`);
         if (svBySRes.ok){
           const svByResJson = await svBySRes.json();
           const svByStrength  =svByResJson?.data?.[0];
@@ -134,7 +135,7 @@ export default function PlayerPage() {
           setSvByStrength(svByStrength);
         }
 
-        const daysres = await fetch (`http://localhost:5000/api/stats/${type}/daysrest/${id}/20242025`);
+        const daysres = await fetch(`/api/stats/${type}/daysrest/${id}/20242025`);
         if (daysres.ok){
           const daysResJson = await daysres.json();
           const daysRestToSet = daysResJson?.data?.[0];
@@ -142,7 +143,7 @@ export default function PlayerPage() {
           setDaysRestData(daysRestToSet);
         }
 
-        const startvsRres =  await fetch (`http://localhost:5000/api/stats/${type}/startedVsRelieved/${id}/20242025`);
+        const startvsRres = await fetch(`/api/stats/${type}/startedVsRelieved/${id}/20242025`);
         if (startvsRres.ok){
           const startVsRelJson = await startvsRres.json();
           const startVsRelToSet = startVsRelJson?.data?.[0];
@@ -150,7 +151,7 @@ export default function PlayerPage() {
           setStartVsRelieved(startVsRelToSet);
         }
 
-        const shootoutRes = await fetch (`http://localhost:5000/api/stats/${type}/shootout/${id}/20242025`);
+        const shootoutRes = await fetch(`/api/stats/${type}/shootout/${id}/20242025`);
         if (shootoutRes.ok){
           const shootoutJson = await shootoutRes.json();
           const shootoutToSet = shootoutJson?.data?.[0];

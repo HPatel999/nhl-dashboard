@@ -37,8 +37,7 @@ export default function TeamPage() {
     async function fetchTeam() {
       try {
 
-        // Fetch standings
-        const standingsRes = await fetch("http://localhost:5000/api/standings");
+        const standingsRes = await fetch("/api/standings");
         const standingsData = await standingsRes.json();
         const team = standingsData.standings.find(
           (t) => t.teamAbbrev.default === abbr

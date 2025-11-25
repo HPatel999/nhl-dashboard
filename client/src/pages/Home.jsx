@@ -86,7 +86,7 @@ export default function Home() {
   useEffect(() => {
     async function fetchStandings() {
       try {
-        const res = await fetch("http://localhost:5000/api/standings");
+        const res = await fetch("/api/standings");
         if (!res.ok) throw new Error("Failed to fetch standings");
         const data = await res.json();
         setTeams(data?.standings || []);
