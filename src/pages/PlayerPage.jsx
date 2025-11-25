@@ -18,7 +18,9 @@ import PuckPossessionStats from "../components/statsTooltip/PuckPossessionStats"
 import PossessionPercentages from "../components/statsTooltip/PossessionPercentages";
 import { usePageTransition } from "../transitions/usePageTransition";
 import ScoringRateStats from "../components/statsTooltip/ScoringRateStats";
-
+import SavesByStrength from "../components/goalieStats/SavesByStrength";
+import DaysRestStats from "../components/goalieStats/DaysRestStats";
+import StartedVsRelievedStats from "../components/goalieStats/StartedVsRelievedStats";
 
 export default function PlayerPage() {
   const { id } = useParams();
@@ -30,6 +32,9 @@ export default function PlayerPage() {
   const [deploymentData,setDeploymentData] = useState(null);
   const [v5Data, set5V5data] = useState(null);
   const [satData,setSatData] = useState(null);
+  const [svByStrength, setSvByStrength] = useState(null);
+  const [daysRestData,setDaysRestData] = useState(null);
+  const [startVsRelievedData, setStartVsRelieved] = useState(null);
   const { hideTransition } = usePageTransition();
 
 
@@ -48,6 +53,7 @@ export default function PlayerPage() {
       setPlayerData(data);
 
       const type = data.position === "G" ? "goalie" : "skater";
+      console.log("Type", type);
       const seasonId = 20242025;
 
       const summaryRes = await fetch(`http://localhost:5000/api/stats/${type}/summary/${id}/${seasonId}`);
@@ -59,7 +65,7 @@ export default function PlayerPage() {
       console.log("Summary data:", summaryJson);
       setSummaryData(summaryJson);
 
-      if (type !== "G") {
+      if (type !== "goalie") {
       const ftaRes = await fetch(`http://localhost:5000/api/stats/${type}/faceoffpercentages/${id}/20242025`);
       if (ftaRes.ok) {
         const ftaJson = await ftaRes.json();
@@ -114,9 +120,34 @@ export default function PlayerPage() {
         setSatData(satData);
       }
 
-
-
     }
+
+      if (type == "goalie"){
+        const svBySRes = await fetch (`http://localhost:5000/api/stats/${type}/savesByStrength/${id}/20242025`);
+        if (svBySRes.ok){
+          const svByResJson = await svBySRes.json();
+          const svByStrength  =svByResJson?.data?.[0];
+          console.log("Saves By Strength:", svByStrength);
+          setSvByStrength(svByStrength);
+        }
+
+        const daysres = await fetch (`http://localhost:5000/api/stats/${type}/daysrest/${id}/20242025`);
+        if (daysres.ok){
+          const daysResJson = await daysres.json();
+          const daysRestToSet = daysResJson?.data?.[0];
+          console.log("Days Rest:", daysRestToSet);
+          setDaysRestData(daysRestToSet);
+        }
+
+        const startvsRres =  await fetch (`http://localhost:5000/api/stats/${type}/startedVsRelieved/${id}/20242025`);
+        if (startvsRres.ok){
+          const startVsRelJson = await startvsRres.json();
+          const startVsRelToSet = startVsRelJson?.data?.[0];
+          console.log("Started vs Relieved:", startVsRelToSet);
+          setStartVsRelieved(startVsRelToSet);
+        }
+
+      }
 
     } catch (err) {
       console.error("Error fetching player or summary:", err);
@@ -342,6 +373,16 @@ export default function PlayerPage() {
          <PossessionPercentages data={satData} primaryColor={color} textColor={textColor}/>
         </section>
       )}
+    
+    {isGoalie && svByStrength && daysRestData && startVsRelievedData &&(
+        <section className="mt-12">
+          <h2 className="text-2xl font-semibold mb-4">Analytics</h2>
+          <SavesByStrength data={svByStrength}  primaryColor={color} textColor={textColor}/>
+          <DaysRestStats data = {daysRestData} primaryColor={color} textColor={textColor}/>
+          <StartedVsRelievedStats data = {startVsRelievedData} primaryColor={color} textColor={textColor}/>
+        </section>
+
+    ) }
 
     </div>
   </div>

@@ -48,14 +48,12 @@ export default function TeamPage() {
 
        
       setTeamData({
-        // Team info
         team_name: team.teamName.default,
         team_abbr: team.teamAbbrev.default,
         logo: team.teamLogo,
         conference: team.conferenceName,
         division: team.divisionName,
 
-        // Basic record
         wins: team.wins,
         losses: team.losses,
         ot_losses: team.otLosses,
@@ -65,22 +63,18 @@ export default function TeamPage() {
         win_pctg: team.winPctg,
         clinch: team.clinchIndicator || "",
 
-        // Goals
         goals_for: team.goalFor,
         goals_against: team.goalAgainst,
         goal_diff: team.goalDifferential,
 
-        // Streaks
         streak_type: team.streakCode || "",
         streak_length: team.streakCount || 0,
 
-        // Regulation / Shootout
         regulation_wins: team.regulationWins,
         reg_ot_wins: (team.regulationPlusOtWins || 0) - (team.regulationWins || 0),
         shootout_wins: team.shootoutWins,
         shootout_losses: team.shootoutLosses,
 
-        // Home/Road splits
         home_games_played: team.homeGamesPlayed,
         home_wins: team.homeWins,
         home_losses: team.homeLosses,
@@ -99,7 +93,6 @@ export default function TeamPage() {
         road_goals_against: team.roadGoalsAgainst,
         road_goal_diff: team.roadGoalDifferential,
 
-        // Last 10 games
         l10_wins: team.l10Wins,
         l10_losses: team.l10Losses,
         l10_ot_losses: team.l10OtLosses,
@@ -109,7 +102,6 @@ export default function TeamPage() {
         l10_goal_diff: team.l10GoalDifferential,
       });
 
-        // Fetch roster
         const rosterRes = await fetch(`http://localhost:5000/api/roster/${abbr}`);
         const rosterData = await rosterRes.json();
 
@@ -157,7 +149,6 @@ export default function TeamPage() {
 
         const radarRes = await fetch(`http://localhost:5000/api/stats/${abbr}/shottype`);
         const radarJson = await radarRes.json();
-        // console.log("Shot type API response:", radarJson);
         const radarRaw = radarJson.data[0];
 
         const shotTypeStats = [
@@ -170,23 +161,18 @@ export default function TeamPage() {
           { key: "Tip-In", goals: radarRaw.goalsTipIn, pct: radarRaw.shootingPctTipIn },
 
         ]
-        // console.log("Shot type const:", shotTypeStats);
 
 
         const totalGoals = shotTypeStats.reduce((sum,s) => sum + s.goals,0);
-        // console.log("totalGoals:", totalGoals);
 
         const normalizeShotTypePctandGoals = shotTypeStats.map(s =>({
           name:s.key,
           goals: totalGoals > 0 ? (s.goals/totalGoals) *100 : 0,
           pct: s.pct * 100
         }));
-        // console.log("Radar Data:", normalizeShotTypePctandGoals);
 
         const scheduleRes = await fetch(`http://localhost:5000/api/schedule/${abbr}`);
-        // console.log(scheduleRes);
         const scheduleJson = await scheduleRes.json();
-        // console.log(scheduleJson);
 
         setGames(scheduleJson.games)
 
@@ -224,7 +210,6 @@ export default function TeamPage() {
  
 
 
-  // Home vs Road goals
 const goalsData = [
   {
     name: "Home",
@@ -240,7 +225,6 @@ const goalsData = [
   },
 ];
 
-// Home vs Road results
 const resultsData = [
   {
     name: "Home",
@@ -283,7 +267,6 @@ const winTypesData = teamData
         />
     <BackToTop primaryColor={color} textColor={textColor} />
 
-  {/* Vertical color stripe */}
   <div
     className="absolute left-0 top-0 h-full"
     style={{
@@ -292,12 +275,10 @@ const winTypesData = teamData
     }}
   />
 
-  {/* Hero Banner */}
   <div
     className="w-full flex items-center justify-center py-12 px-6"
     style={{ backgroundColor: color }}
   >
-    {/* Logo */}
     {teamData.logo && (
       <div className="flex-shrink-0 flex justify-center">
         <img
@@ -311,7 +292,6 @@ const winTypesData = teamData
       </div>
     )}
 
-    {/* Team Info */}
     <div className="flex-1 px-6 flex flex-col justify-center items-center text-center">
       <h1
         className="font-bold"
@@ -338,11 +318,9 @@ const winTypesData = teamData
     </div>
   </div>
 
-  {/* Roster */}
 <section className="p-6 mb-8">
   <h2 className="text-2xl font-semibold mb-4">Roster</h2>
 
-  {/* Forwards */}
   {roster.filter(p => ["L", "C", "R"].includes(p.positionCode)).length > 0 && (
     <div className="mb-6">
       <h3 className="text-xl font-semibold mb-2">Forwards</h3>
@@ -355,7 +333,6 @@ const winTypesData = teamData
   )}
 
 
-  {/* Defensemen */}
   {roster.filter(p => p.positionCode === "D").length > 0 && (
     <div className="mb-6">
       <h3 className="text-xl font-semibold mb-2">Defensemen</h3>
@@ -369,7 +346,6 @@ const winTypesData = teamData
     </div>
   )}
 
-  {/* Goalies */}
   {roster.filter(p => p.positionCode === "G").length > 0 && (
     <div className="mb-6">
       <h3 className="text-xl font-semibold mb-2">Goalies</h3>
@@ -384,11 +360,9 @@ const winTypesData = teamData
   )}
 </section>
 
-  {/* Stats & Charts */}
 <section className="p-6 mb-8">
   <h2 className="text-2xl font-semibold mb-6">Team Stats</h2>
 
-  {/* Key Numbers */}
   
   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
     <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
@@ -464,9 +438,7 @@ const winTypesData = teamData
 
 
   
-{/* Charts Section */}
 <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-  {/* Home vs Road Goals */}
   <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
     <h3 className="text-xl font-semibold mb-4 text-center">Home vs Road Goals</h3>
     <div className="w-full max-w-md"> {/* constrains chart width */}
@@ -474,7 +446,6 @@ const winTypesData = teamData
     </div>
   </div>
 
-  {/* Home vs Road Results */}
   <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
     <h3 className="text-xl font-semibold mb-4 text-center">Home vs Road Results</h3>
     <div className="w-full max-w-md">
@@ -482,7 +453,6 @@ const winTypesData = teamData
     </div>
   </div>
 
-  {/* Win Breakdown */}
   <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
     <h3 className="text-xl font-semibold mb-4 text-center">Win Breakdown</h3>
     <div className="w-full max-w-md h-72"> {/* matches other charts' max width */}
@@ -490,7 +460,6 @@ const winTypesData = teamData
     </div>
   </div>
 
-   {/* Faceoff Breakdown */}
   <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
     <h3 className="text-xl font-semibold mb-4 text-center">Faceoff Breakdown</h3>
     <div className="w-full max-w-md h-72"> {/* matches other charts' max width */}
@@ -498,7 +467,6 @@ const winTypesData = teamData
     </div>
   </div>
 
-    {/* Goals By Period Results */}
   <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
     <h3 className="text-xl font-semibold mb-4 text-center">Goals By Period</h3>
     <div className="w-full max-w-md">
@@ -506,7 +474,6 @@ const winTypesData = teamData
     </div>
   </div>
    
-    {/* Shooting Type  and  Goals */}
   <div className="p-4 bg-white rounded-2xl shadow flex flex-col items-center">
     <h3 className="text-xl font-semibold mb-6 text-center"> Shooting Analysis</h3>
     <div className="w-full max-w-md">
