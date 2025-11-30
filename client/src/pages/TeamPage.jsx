@@ -101,7 +101,7 @@ export default function TeamPage() {
         l10_goal_diff: team.l10GoalDifferential,
       });
 
-        const rosterRes = await fetch(`http://localhost:5000/api/roster/${abbr}`);
+        const rosterRes = await fetch(`/api/roster?team=${abbr}`);
         const rosterData = await rosterRes.json();
 
         const rosterMapped = [
@@ -117,7 +117,7 @@ export default function TeamPage() {
           headshot: p.headshot,
         }));
 
-        const faceoffRes = await fetch(`http://localhost:5000/api/stats/${abbr}/faceoffpercentages`);
+        const faceoffRes = await fetch(`/api/team-stats?teamAbbr=${abbr}&endpoint=faceoffpercentages`);
         const faceoffData = await faceoffRes.json();
         const faceoffMapped = (faceoffData.data || []).map((p) => ([
           { name: "Overall", value: p.faceoffWinPct },
@@ -129,7 +129,7 @@ export default function TeamPage() {
           { name: "Offensive Zone", value: p.offensiveZoneFaceoffPct },
           ])).flat(); 
         
-          const goalsByPeriodRes = await fetch(`http://localhost:5000/api/stats/${abbr}/goalsbyperiod`);
+          const goalsByPeriodRes = await fetch(`/api/team-stats?teamAbbr=${abbr}&endpoint=goalsbyperiod`);
           const goalsByPeriodJson = await goalsByPeriodRes.json();
           if (goalsByPeriodJson.data && goalsByPeriodJson.data.length > 0) {
             const p = goalsByPeriodJson.data[0];
@@ -146,7 +146,7 @@ export default function TeamPage() {
         
           }
 
-        const radarRes = await fetch(`http://localhost:5000/api/stats/${abbr}/shottype`);
+        const radarRes = await fetch(`/api/team-stats?teamAbbr=${abbr}&endpoint=shottype`);
         const radarJson = await radarRes.json();
         const radarRaw = radarJson.data[0];
 
@@ -170,7 +170,7 @@ export default function TeamPage() {
           pct: s.pct * 100
         }));
 
-        const scheduleRes = await fetch(`http://localhost:5000/api/schedule/${abbr}`);
+        const scheduleRes = await fetch(`/api/schedule?teamAbbr=${abbr}`);
         const scheduleJson = await scheduleRes.json();
 
         setGames(scheduleJson.games)
