@@ -2,7 +2,7 @@ import axios from "axios";
 
 export default async function handler(req, res) {
   const { teamAbbr, endpoint } = req.query;
-  const seasonId = 20242025;
+  const seasonId = 20252025;
 
   if (!teamAbbr || !endpoint) {
     return res.status(400).json({ error: "teamAbbr and endpoint required" });
