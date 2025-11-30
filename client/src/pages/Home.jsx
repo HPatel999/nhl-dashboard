@@ -82,7 +82,7 @@ export default function Home() {
         navigate(`/team/${team.teamAbbrev.default}`);
       
     };
-
+    //empty push
   useEffect(() => {
     async function fetchStandings() {
       try {
