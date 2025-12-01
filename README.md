@@ -106,3 +106,7 @@ This project:
 ## Author
 
 Developed by **Harsh Patel**
+
+If you would like to use this project for your own purposes, please do cite me.
+
+If you'd like to contribute, especially by adding advanced stats, feel free to fork the repo and open a pull request.
