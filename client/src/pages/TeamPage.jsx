@@ -26,7 +26,7 @@ export default function TeamPage() {
   const [goalsByPeriodData, setGoalsByPeriodData] = useState([]);
   const [radarData, setRadarData] = useState([]);
   const [games, setGames] = useState([]);
-  const { hideTransition } = usePageTransition();
+  const { transitionData, hideTransition } = usePageTransition();
 
 
 
@@ -195,7 +195,7 @@ export default function TeamPage() {
     console.log("Unmounted TeamPage");
   };
   }, [abbr]);
-
+  if (transitionData) return null
   if (loading) return <p className="flex h-screen w-screen items-center justify-center ">Loading... Using the provided Buttons/Navigation tools would have shown you a cool animation.</p>;
   if (!teamData) return <p className="flex h-screen w-screen items-center justify-center">Team not found.</p>;
   if (!faceoffData) return <p className="flex h-screen w-screen items-center justify-center">Faceoff Stats N/A.</p>;
