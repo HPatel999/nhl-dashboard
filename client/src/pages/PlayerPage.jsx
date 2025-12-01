@@ -37,7 +37,7 @@ export default function PlayerPage() {
   const [daysRestData,setDaysRestData] = useState(null);
   const [startVsRelievedData, setStartVsRelieved] = useState(null);
   const [shootoutData, setShootOutData] = useState(null);
-  const { hideTransition } = usePageTransition();
+  const {transitionData, hideTransition } = usePageTransition();
 
 
 
@@ -173,7 +173,8 @@ export default function PlayerPage() {
 
   return () => console.log("Unmounted PlayerPage");
 }, [id]);
-
+  if (transitionData) return null
+  
   if (!playerData) {
     return <div className="text-center mt-10">Loading player data...</div>;
   }

@@ -58,6 +58,20 @@ export default function PageTransition({ data }) {
         >
           {name}
         </motion.h1>
+        <motion.div
+          className="mt-6 flex flex-col items-center"
+          initial={{ opacity: 0 }}
+          animate={{
+            opacity: 1,
+            transition: { delay: 0.35, duration: 0.5 },
+          }}
+        >
+          <p className="text-lg font-semibold">Loading..</p>
+
+          <div
+            className="mt-3 h-8 w-8 border-4 border-white/40 border-t-white rounded-full animate-spin"
+          />
+        </motion.div>
       </motion.div>
     </AnimatePresence>
   );
