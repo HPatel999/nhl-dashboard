@@ -70,6 +70,10 @@ export default function PageTransition({ data }) {
 
           <div
             className="mt-3 h-8 w-8 border-4 border-white/40 border-t-white rounded-full animate-spin"
+            style={{
+              borderColor: `${textColor}40`,
+              borderTopColor: textColor
+            }}
           />
         </motion.div>
       </motion.div>
