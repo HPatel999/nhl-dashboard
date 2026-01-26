@@ -82,8 +82,8 @@ export default function Home() {
         navigate(`/team/${team.teamAbbrev.default}`);
       
     };
-    //empty push
   useEffect(() => {
+    document.title = "NHL Analytics Dashboard";
     async function fetchStandings() {
       try {
         const res = await fetch("/api/standings");

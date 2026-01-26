@@ -45,7 +45,7 @@ export default function TeamPage() {
 
         if (!team) throw new Error("Team not found");
 
-       
+      document.title = `${team.teamName.default} | NHL Analytics`;
       setTeamData({
         team_name: team.teamName.default,
         team_abbr: team.teamAbbrev.default,
@@ -187,7 +187,7 @@ export default function TeamPage() {
         setLoading(false);
       }
 
-      
+   
     }
 
     fetchTeam();

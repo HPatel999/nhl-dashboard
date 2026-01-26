@@ -54,7 +54,7 @@ export default function PlayerPage() {
       const data = await res.json();
       console.log("Landing data:", data);
       setPlayerData(data);
-
+      document.title = `${data.fullName} | NHL Analytics`;
       const type = data.position === "G" ? "goalie" : "skater";
       console.log("Type", type);
       const seasonId = 20242025;
