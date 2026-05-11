@@ -4,11 +4,25 @@ import teamColors from "../data/teamColors";
 import { usePageTransition } from "../transitions/usePageTransition";
 
 
-
-function TeamCard({ team, isHovered, isOtherHovered, onHover, onLeave, onClick }) {
+function TeamCard({
+  team,
+  isHovered,
+  isOtherHovered,
+  onHover,
+  onLeave,
+  onClick,
+}) {
   const colors = teamColors[team.teamAbbrev.default] || {
     primary: "#222222",
     secondary: "#FFFFFF",
+  };
+
+  const clinchMap = {
+    x: "Playoffs",
+    y: "Division",
+    z: "Conference",
+    p: "Presidents",
+    e: "Eliminated"
   };
 
   return (
@@ -19,6 +33,7 @@ function TeamCard({ team, isHovered, isOtherHovered, onHover, onLeave, onClick }
       className={`
         relative cursor-pointer p-6 flex flex-col items-center justify-center rounded-3xl
         transition-all duration-300 ease-in-out text-white border border-white/10 backdrop-blur-md
+        min-h-[260px]
         ${
           isHovered
             ? "z-30 scale-105 shadow-2xl"
@@ -34,6 +49,36 @@ function TeamCard({ team, isHovered, isOtherHovered, onHover, onLeave, onClick }
           : "rgba(255,255,255,0.05)",
       }}
     >
+       <div className="absolute bottom-3 left-3 text-xs">
+        <p
+          className={`font-semibold ${
+            isHovered 
+          }`}
+        >
+          #{team.leagueSequence}
+        </p>
+      </div>
+
+      <div className="absolute top-3 left-3 text-xs">
+        <p
+          className={`font-semibold ${
+            isHovered 
+          }`}
+        >
+          {team.conferenceName} #{team.conferenceSequence}
+        </p>
+      </div>
+
+      <div className="absolute top-3 right-3 text-xs">
+        <p
+          className={`font-semibold ${
+            isHovered 
+          }`}
+        >
+          {team.divisionName} #{team.divisionSequence}
+        </p>
+      </div>
+
       <div
         className={`w-24 h-24 mb-4 transition-transform duration-300 ${
           isHovered ? "scale-110" : "scale-100"
@@ -52,11 +97,24 @@ function TeamCard({ team, isHovered, isOtherHovered, onHover, onLeave, onClick }
 
       <p
         className={`mt-1 text-sm ${
-          isHovered ? "text-white" : "text-gray-400"
+          isHovered 
         }`}
       >
         {team.points} pts
       </p>
+
+     {team.clinchIndicator && (
+      <p
+        className={`
+          absolute bottom-3 text-[10px] uppercase tracking-[0.25em]
+          ${
+            isHovered
+          }
+        `}
+      >
+        {clinchMap[team.clinchIndicator]}
+      </p>
+    )}
     </div>
   );
 }
@@ -68,6 +126,8 @@ export default function Home() {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const { showTransition, hideTransition } = usePageTransition();
+  const [hoveredTeam, setHoveredTeam] = useState(null);
+
 
   const handleTeamClick = (team) => {
       const colors = teamColors[team.teamAbbrev.default];
@@ -125,14 +185,26 @@ export default function Home() {
       </div>
     );
   }
+const hoveredColors =
+  hoveredTeam &&
+  teamColors[hoveredTeam.teamAbbrev.default];
 
+const backgroundStyle = hoveredColors
+  ? {
+      background: `
+     linear-gradient(${hoveredColors.primary} 0%, #090808  100%)
+      `,
+      transition: "background 600ms ease",
+    }
+  : {
+      background:
+        "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)",
+      transition: "background 600ms ease",
+    };
   return (
     <div
       className="min-h-screen text-white relative overflow-hidden"
-      style={{
-        background: "linear-gradient(180deg, #0f172a 0%, #1e293b 100%)",
-        backgroundAttachment: "fixed",
-      }}
+      style={backgroundStyle}
     >
       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0)_40%,rgba(255,255,255,0)_100%)] animate-[shimmer_8s_infinite_linear] pointer-events-none"></div>
 
@@ -155,19 +227,74 @@ export default function Home() {
         </p>
       </section>
 
-      <section className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-8 pb-24 px-6 relative z-10">
+      <section className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-8 pb-24 px-6 relative z-10">
         {teams.map((team, i) => (
           <TeamCard
             key={team.teamAbbrev.default}
             team={team}
             isHovered={hoveredIdx === i}
             isOtherHovered={hoveredIdx !== null && hoveredIdx !== i}
-            onHover={() => setHoveredIdx(i)}
-            onLeave={() => setHoveredIdx(null)}
+            onHover={() => {
+              setHoveredIdx(i);
+              setHoveredTeam(team);
+            }}
+            onLeave={() => {
+              setHoveredIdx(null);
+              setHoveredTeam(null);
+            }}
             onClick={() =>  handleTeamClick(team)}
           />
         ))}
       </section>
+      <section className="max-w-6xl mx-auto px-6 pb-16 relative z-10">
+      <div className="border border-white/10 bg-white/5 rounded-2xl p-4 backdrop-blur-md">
+        <h2 className="text-sm font-semibold text-white mb-3 tracking-wide uppercase">
+          Standings Legend
+        </h2>
+
+        <div className="space-y-3 text-sm text-gray-300">
+          <div>
+            <span className="font-semibold text-white">Playoff</span> — Clinched Playoff Berth
+          </div>
+
+          <div>
+            <span className="font-semibold text-white">Division</span> — Clinched Division
+            <p className="text-gray-400 mt-1 text-xs leading-relaxed">
+              Guarantees a top-3 playoff seed within the conference and
+              home-ice advantage in the first round.
+            </p>
+          </div>
+
+          <div>
+            <span className="font-semibold text-white">Conference</span> — Clinched Conference
+            <p className="text-gray-400 mt-1 text-xs leading-relaxed">
+              Secures the top conference seed and home-ice advantage
+              through the conference playoffs.
+            </p>
+          </div>
+
+          <div>
+            <span className="font-semibold text-white">President's</span> — Presidents' Trophy
+            <p className="text-gray-400 mt-1 text-xs leading-relaxed">
+              Awarded to the NHL team with the best regular-season record.
+              Guarantees league-wide home-ice advantage throughout the playoffs.
+            </p>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <footer className="relative z-10 border-t border-white/10 mt-8">
+    <div className="max-w-6xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+      <p>
+        © 2026 NHL Dashboard. Built for educational and portfolio purposes.
+      </p>
+
+      <p>
+        NHL data provided by the NHL public API.
+      </p>
+    </div>
+</footer>
     </div>
   );
 }
